@@ -116,10 +116,6 @@ function onTouchStart(e: TouchEvent) {
   touchStartX = e.touches[0].clientX;
 }
 
-function onTouchMove(_e: TouchEvent) {
-  // 仅记录结束位置在 touchend
-}
-
 function onTouchEnd(e: TouchEvent) {
   touchEndX = e.changedTouches[0].clientX;
   const delta = touchStartX - touchEndX;
