@@ -16,7 +16,7 @@ export interface CreateBookingDto {
 }
 
 export function checkAvailability(venueId: number, useDate: string, startTime: string, endTime: string) {
-  return request.get<{ available: boolean; conflict?: boolean; hasUnavailableSlot?: boolean }>(
+  return request.get<{ available: boolean; conflict?: boolean; hasUnavailableSlot?: boolean; past?: boolean }>(
     '/booking-applications/check-availability',
     { params: { venue_id: venueId, use_date: useDate, start_time: startTime, end_time: endTime } }
   );
@@ -60,4 +60,8 @@ export function rejectBooking(id: number, rejectReason: string) {
 
 export function getAllBookings() {
   return request.get<BookingApplication[]>('/booking-applications/all');
+}
+
+export function deleteBooking(id: number) {
+  return request.delete(`/booking-applications/${id}`);
 }

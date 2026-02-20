@@ -12,3 +12,7 @@ export function markRead(id: number) {
 export function markAllRead() {
   return request.post('/notifications/mark-all-read');
 }
+
+export function deleteNotification(id: number) {
+  return request.delete(`/notifications/${id}`);
+}

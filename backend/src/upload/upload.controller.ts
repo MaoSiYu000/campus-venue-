@@ -2,11 +2,17 @@ import { Controller, Post, UseGuards, UseInterceptors, UploadedFile } from '@nes
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { mkdirSync, existsSync } from 'fs';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
 const uploadDir = process.env.UPLOAD_DIR || 'uploads';
+const venuePhotoDir = `./${uploadDir}/venues`;
+if (!existsSync(venuePhotoDir)) {
+  mkdirSync(venuePhotoDir, { recursive: true });
+}
+
 
 @Controller('upload')
 export class UploadController {
@@ -49,5 +55,26 @@ export class UploadController {
   uploadAvatar(@UploadedFile() file: Express.Multer.File) {
     if (!file) return { path: null };
     return { path: `/uploads/avatars/${file.filename}` };
+  }
+
+  @Post('venue-photo')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('venue_admin', 'system_admin')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: venuePhotoDir,
+        filename: (_, file, cb) => {
+          const ext = extname(file.originalname || '').toLowerCase() || '.jpg';
+          const name = Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
+          cb(null, name);
+        },
+      }),
+      limits: { fileSize: 15 * 1024 * 1024 },
+    }),
+  )
+  uploadVenuePhoto(@UploadedFile() file: Express.Multer.File) {
+    if (!file) return { path: null };
+    return { path: `/uploads/venues/${file.filename}` };
   }
 }

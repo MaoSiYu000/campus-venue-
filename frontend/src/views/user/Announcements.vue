@@ -37,10 +37,13 @@
       <h3 class="section-title">站内通知</h3>
       <el-empty v-if="!notifications.length && !notifLoading" description="暂无站内通知" />
       <template v-else>
-        <el-card v-for="n in notifications" :key="'n-' + n.id" class="announcement-card" :class="{ unread: !n.isRead }">
-          <h3>{{ n.title }}</h3>
-          <div class="content">{{ n.content }}</div>
-          <div class="time">{{ n.createdAt }}</div>
+        <el-card v-for="n in notifications" :key="'n-' + n.id" class="announcement-card notif-card" :class="{ unread: !n.isRead }">
+          <span class="notif-close" :class="{ loading: deletingId === n.id }" @click="deleteNotif(n)" title="删除">×</span>
+          <div class="notif-body">
+            <h3>{{ n.title }}</h3>
+            <div class="content">{{ n.content }}</div>
+            <div class="time">{{ n.createdAt }}</div>
+          </div>
         </el-card>
       </template>
     </div>
@@ -53,7 +56,7 @@ import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { getMustRead, getMustReadHistory, markAnnouncementsRead } from '@/api/announcement';
-import { getNotifications } from '@/api/notification';
+import { getNotifications, deleteNotification } from '@/api/notification';
 import type { Announcement } from '@/types';
 
 const router = useRouter();
@@ -65,6 +68,7 @@ const loading = ref(false);
 const historyLoading = ref(false);
 const notifLoading = ref(false);
 const confirmingId = ref<number | null>(null);
+const deletingId = ref<number | null>(null);
 const activeTab = ref<'must-read' | 'history'>('must-read');
 
 onMounted(async () => {
@@ -105,6 +109,19 @@ function enterMain() {
   store.setAnnouncementsConfirmed();
   router.push('/user/venue-list');
 }
+
+async function deleteNotif(n: { id: number; title: string }) {
+  deletingId.value = n.id;
+  try {
+    await deleteNotification(n.id);
+    notifications.value = notifications.value.filter((x) => x.id !== n.id);
+    ElMessage.success('已删除');
+  } catch (e: any) {
+    ElMessage.error(e?.message || '删除失败');
+  } finally {
+    deletingId.value = null;
+  }
+}
 </script>
 
 <style scoped>
@@ -126,6 +143,28 @@ function enterMain() {
 .announcement-card .content { white-space: pre-wrap; color: #666; margin: 8px 0; }
 .announcement-card .time { font-size: 12px; color: #999; }
 .card-actions { margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee; }
+
+.notif-card { position: relative; padding-left: 36px; }
+.notif-close {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  color: #f56c6c;
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+}
+.notif-close:hover { background: rgba(245, 108, 108, 0.12); color: #f56c6c; }
+.notif-close.loading { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+.notif-body { flex: 1; }
 .content { white-space: pre-wrap; color: #666; margin: 8px 0; }
 .time { font-size: 12px; color: #999; }
 </style>

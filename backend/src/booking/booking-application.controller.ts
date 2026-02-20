@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Body,
   Param,
   Query,
@@ -111,5 +112,12 @@ export class BookingApplicationController {
     @Body() dto: RejectBookingDto,
   ) {
     return this.service.reject(id, user.id, dto.rejectReason);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('system_admin')
+  async deleteBySystemAdmin(@Param('id', ParseIntPipe) id: number) {
+    return this.service.deleteBySystemAdmin(id);
   }
 }

@@ -37,6 +37,10 @@
     <el-row :gutter="16" style="margin-top: 16px">
       <el-col v-for="v in list" :key="v.id" :span="8">
         <el-card shadow="hover" class="venue-card" @click="goDetail(v.id)">
+          <div class="venue-photo-wrap">
+            <img v-if="v.photos?.length" :src="photoSrc(v.photos[0])" alt="" class="venue-photo" />
+            <div v-else class="venue-photo placeholder">暂无照片</div>
+          </div>
           <div class="name">{{ v.name }}</div>
           <div class="meta">类型：{{ venueTypeName(v.venueType) }} | 容量 {{ v.capacity }} 人</div>
           <div class="meta">位置：{{ v.location || '-' }}</div>
@@ -73,6 +77,11 @@ const filters = reactive<Record<string, any>>({
 function venueTypeName(t: string) {
   const m: Record<string, string> = { report_hall: '报告厅', meeting_room: '会议室', activity_center: '活动中心' };
   return m[t] || t;
+}
+
+function photoSrc(path: string) {
+  if (!path) return '';
+  return path.startsWith('/') ? path : `/${path}`;
 }
 
 function resetFilters() {
@@ -112,6 +121,9 @@ onMounted(load);
 
 <style scoped>
 .venue-card { cursor: pointer; margin-bottom: 16px; }
+.venue-photo-wrap { margin: -20px -20px 12px -20px; border-radius: 4px 4px 0 0; overflow: hidden; }
+.venue-photo { width: 100%; height: 140px; object-fit: cover; display: block; }
+.venue-photo.placeholder { height: 140px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #999; }
 .venue-card .name { font-weight: bold; margin-bottom: 8px; }
 .venue-card .meta { font-size: 12px; color: #666; margin: 4px 0; }
 </style>

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -35,6 +35,15 @@ export class NotificationController {
   async markAllRead(@CurrentUser() user: CurrentUserPayload) {
     const targetType = user.role === 'user' ? 'user' : 'venue_admin';
     await this.service.markAllRead(targetType, user.id);
+    return { message: 'ok' };
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user', 'venue_admin')
+  async deleteOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
+    const targetType = user.role === 'user' ? 'user' : 'venue_admin';
+    await this.service.deleteOne(id, targetType, user.id);
     return { message: 'ok' };
   }
 }

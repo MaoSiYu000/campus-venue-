@@ -13,3 +13,17 @@ export function uploadProposal(file: File) {
     })
     .then((r) => r.data);
 }
+
+export function uploadVenuePhoto(file: File) {
+  const form = new FormData();
+  form.append('file', file);
+  const token = localStorage.getItem('accessToken');
+  return axios
+    .post<{ path: string | null }>('/api/v1/upload/venue-photo', form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
+    .then((r) => r.data);
+}

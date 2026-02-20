@@ -19,6 +19,10 @@ export class BookingApplicationService {
 
   async create(userId: number, dto: CreateBookingDto) {
     await this.venueService.findOne(dto.venueId);
+    const slotStart = new Date(`${dto.useDate} ${dto.startTime}`);
+    if (slotStart <= new Date()) {
+      throw new BadRequestException('无法预约当前时间之前的场地，请选择未开始的时间段');
+    }
     const conflict = await this.checkConflict(dto.venueId, dto.useDate, dto.startTime, dto.endTime, null);
     if (conflict) throw new BadRequestException('该时间段已被预约或不可用');
     const booking = this.repo.create({
@@ -55,6 +59,10 @@ export class BookingApplicationService {
   }
 
   async checkAvailability(venueId: number, useDate: string, startTime: string, endTime: string) {
+    const slotStart = new Date(`${useDate} ${startTime}`);
+    if (slotStart <= new Date()) {
+      return { available: false, conflict: false, hasUnavailableSlot: false, past: true };
+    }
     const conflict = await this.checkConflict(venueId, useDate, startTime, endTime, null);
     const slots = await this.slotRepo
       .createQueryBuilder('s')
@@ -62,7 +70,7 @@ export class BookingApplicationService {
       .andWhere('s.start_time < :end', { end: `${useDate} ${endTime}` })
       .andWhere('s.end_time > :start', { start: `${useDate} ${startTime}` })
       .getMany();
-    return { available: !conflict && slots.length === 0, conflict, hasUnavailableSlot: slots.length > 0 };
+    return { available: !conflict && slots.length === 0, conflict, hasUnavailableSlot: slots.length > 0, past: false };
   }
 
   async findMyBookings(userId: number) {
@@ -183,5 +191,12 @@ export class BookingApplicationService {
   async getOverviewForVenueAdmin(venueAdminId: number) {
     const venues = await this.venueService.findManagedByVenueAdmin(venueAdminId);
     return this.getOverviewsByVenueIds(venues.map((v: Venue) => v.id));
+  }
+
+  async deleteBySystemAdmin(id: number) {
+    const booking = await this.repo.findOne({ where: { id } });
+    if (!booking) throw new NotFoundException('预约不存在');
+    await this.repo.remove(booking);
+    return { message: '已删除' };
   }
 }

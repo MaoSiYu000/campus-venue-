@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
@@ -45,5 +45,12 @@ export class NotificationService {
 
   async markAllRead(targetType: string, targetId: number) {
     await this.repo.update({ targetType, targetId }, { isRead: 1 });
+  }
+
+  async deleteOne(id: number, targetType: string, targetId: number) {
+    const n = await this.repo.findOne({ where: { id, targetType, targetId } });
+    if (!n) throw new NotFoundException('通知不存在或无权删除');
+    await this.repo.remove(n);
+    return { message: 'ok' };
   }
 }

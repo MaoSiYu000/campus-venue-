@@ -1,6 +1,7 @@
 <template>
   <div class="page">
     <h2>场地管理</h2>
+    <p class="desc">维护与更新场地基本信息与照片，学生将在场地列表中看到照片与信息。</p>
     <el-table :data="list" v-loading="loading" border>
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column prop="name" label="名称" width="140" />
@@ -9,6 +10,12 @@
       </el-table-column>
       <el-table-column prop="capacity" label="容量" width="80" />
       <el-table-column prop="location" label="位置" />
+      <el-table-column label="照片" width="80">
+        <template #default="{ row }">
+          <span v-if="row.photos?.length">{{ row.photos.length }} 张</span>
+          <span v-else class="text-muted">无</span>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" width="90">
         <template #default="{ row }">
           <el-tag :type="row.isAvailable ? 'success' : 'info'">{{ row.isAvailable ? '可用' : '不可用' }}</el-tag>
@@ -21,12 +28,39 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog v-model="editVisible" title="编辑场地" width="500px" @close="editForm = null">
+    <el-dialog v-model="editVisible" title="编辑场地" width="560px" @close="editForm = null">
       <el-form v-if="editForm" :model="editForm" label-width="100px">
         <el-form-item label="名称"><el-input v-model="editForm.name" /></el-form-item>
-        <el-form-item label="地址"><el-input v-model="editForm.address" /></el-form-item>
+        <el-form-item label="位置"><el-input v-model="editForm.location" placeholder="楼栋/区域" /></el-form-item>
+        <el-form-item label="地址"><el-input v-model="editForm.address" placeholder="详细地址" /></el-form-item>
+        <el-form-item label="容量"><el-input-number v-model="editForm.capacity" :min="0" style="width: 100%" /></el-form-item>
+        <el-form-item label="开放时间">
+          <el-time-picker v-model="editForm.openTimeVal" value-format="HH:mm" format="HH:mm" placeholder="开始" style="width: 48%" />
+          —
+          <el-time-picker v-model="editForm.closeTimeVal" value-format="HH:mm" format="HH:mm" placeholder="结束" style="width: 48%" />
+        </el-form-item>
+        <el-form-item label="设备">
+          <el-checkbox v-model="editForm.hasProjector">投影</el-checkbox>
+          <el-checkbox v-model="editForm.hasSound">音响</el-checkbox>
+        </el-form-item>
         <el-form-item label="可用">
           <el-switch v-model="editForm.isAvailable" :active-value="1" :inactive-value="0" />
+        </el-form-item>
+        <el-form-item label="场地照片">
+          <div class="photo-list">
+            <div v-for="(url, i) in editForm.photos" :key="url" class="photo-item">
+              <img :src="photoUrl(url)" alt="" />
+              <el-button type="danger" link size="small" class="photo-remove" @click="removePhoto(i)">删除</el-button>
+            </div>
+            <el-upload
+              :show-file-list="false"
+              accept="image/*"
+              :before-upload="beforePhotoUpload"
+            >
+              <el-button type="primary" plain size="small">上传图片</el-button>
+            </el-upload>
+          </div>
+          <div class="hint">支持 JPG/PNG 等，单张不超过 5MB，学生将在场地列表中看到。</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -56,16 +90,35 @@
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { getManagedVenues, updateVenue, addUnavailableSlot } from '@/api/venue';
+import { uploadVenuePhoto } from '@/api/upload';
 import type { Venue } from '@/types';
 
 const list = ref<Venue[]>([]);
 const loading = ref(false);
 const editVisible = ref(false);
-const editForm = ref<{ id: number; name: string; address: string | null; isAvailable: number } | null>(null);
+const editForm = ref<{
+  id: number;
+  name: string;
+  location: string | null;
+  address: string | null;
+  capacity: number;
+  openTimeVal: string | null;
+  closeTimeVal: string | null;
+  hasProjector: boolean;
+  hasSound: boolean;
+  isAvailable: number;
+  photos: string[];
+} | null>(null);
 const saving = ref(false);
 const slotVisible = ref(false);
 const slotForm = reactive({ venueId: 0, startTime: '', endTime: '', reason: '' });
 const slotSaving = ref(false);
+
+function photoUrl(path: string) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return path.startsWith('/') ? path : `/${path}`;
+}
 
 function venueTypeName(t: string) {
   const m: Record<string, string> = { report_hall: '报告厅', meeting_room: '会议室', activity_center: '活动中心' };
@@ -83,8 +136,48 @@ async function load() {
 }
 
 function edit(row: Venue) {
-  editForm.value = { id: row.id, name: row.name, address: row.address ?? '', isAvailable: row.isAvailable };
+  editForm.value = {
+    id: row.id,
+    name: row.name,
+    location: row.location ?? '',
+    address: row.address ?? '',
+    capacity: row.capacity ?? 0,
+    openTimeVal: row.openTime ?? null,
+    closeTimeVal: row.closeTime ?? null,
+    hasProjector: !!(row.hasProjector ?? 0),
+    hasSound: !!(row.hasSound ?? 0),
+    isAvailable: row.isAvailable ?? 1,
+    photos: Array.isArray(row.photos) ? [...row.photos] : [],
+  };
   editVisible.value = true;
+}
+
+function removePhoto(index: number) {
+  if (editForm.value) editForm.value.photos.splice(index, 1);
+}
+
+const PHOTO_MAX_SIZE = 15 * 1024 * 1024;
+
+function beforePhotoUpload(file: File) {
+  if (file.size > PHOTO_MAX_SIZE) {
+    ElMessage.warning('图片不能超过 15MB，请压缩后上传');
+    return false;
+  }
+  onPhotoUpload(file);
+  return false;
+}
+
+async function onPhotoUpload(file: File) {
+  if (!editForm.value) return;
+  try {
+    const res = await uploadVenuePhoto(file);
+    if (res.path) {
+      editForm.value.photos.push(res.path);
+      ElMessage.success('已添加图片');
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || '上传失败');
+  }
 }
 
 async function saveEdit() {
@@ -93,8 +186,15 @@ async function saveEdit() {
   try {
     await updateVenue(editForm.value.id, {
       name: editForm.value.name,
+      location: editForm.value.location || undefined,
       address: editForm.value.address || undefined,
+      capacity: editForm.value.capacity,
+      openTime: editForm.value.openTimeVal || undefined,
+      closeTime: editForm.value.closeTimeVal || undefined,
+      hasProjector: editForm.value.hasProjector,
+      hasSound: editForm.value.hasSound,
       isAvailable: editForm.value.isAvailable,
+      photos: editForm.value.photos,
     });
     ElMessage.success('已保存');
     editVisible.value = false;
@@ -138,3 +238,12 @@ async function addSlot() {
 onMounted(load);
 </script>
 
+<style scoped>
+.desc { color: #666; font-size: 13px; margin-bottom: 16px; }
+.text-muted { color: #999; }
+.photo-list { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+.photo-item { position: relative; width: 80px; }
+.photo-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; display: block; }
+.photo-remove { position: absolute; bottom: 0; left: 0; right: 0; }
+.hint { font-size: 12px; color: #999; margin-top: 8px; }
+</style>

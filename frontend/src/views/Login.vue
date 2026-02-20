@@ -252,7 +252,7 @@ async function onSubmit() {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding-right: clamp(24px, 8vw, 120px);
+  padding-right: clamp(24px, 14vw, 200px);
   z-index: 1;
 }
 
