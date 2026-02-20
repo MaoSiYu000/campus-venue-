@@ -191,8 +191,8 @@ async function saveEdit() {
       capacity: editForm.value.capacity,
       openTime: editForm.value.openTimeVal || undefined,
       closeTime: editForm.value.closeTimeVal || undefined,
-      hasProjector: editForm.value.hasProjector,
-      hasSound: editForm.value.hasSound,
+      hasProjector: editForm.value.hasProjector ? 1 : 0,
+      hasSound: editForm.value.hasSound ? 1 : 0,
       isAvailable: editForm.value.isAvailable,
       photos: editForm.value.photos,
     });
