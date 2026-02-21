@@ -81,30 +81,38 @@
       </Transition>
     </Teleport>
 
-    <!-- 已确认或从菜单进入：公告 + 站内通知（无必读/历史之分） -->
+    <!-- 已确认或从菜单进入：固定高度，上公告下通知，各自内部滚动 -->
     <div v-show="!showConfirmModal" class="content-wrap">
-      <h2>通知与公告</h2>
-      <h3 class="section-title">公告</h3>
-      <el-empty v-if="!historyList.length && !historyLoading" description="暂无公告" />
-      <template v-else>
-        <el-card v-for="a in historyList" :key="'h-' + a.id" class="announcement-card">
-          <h3>{{ a.title }}</h3>
-          <div class="content">{{ a.content }}</div>
-          <div class="time">{{ a.createdAt }}</div>
-        </el-card>
-      </template>
-      <h3 class="section-title">站内通知</h3>
-      <el-empty v-if="!notifications.length && !notifLoading" description="暂无站内通知" />
-      <template v-else>
-        <el-card v-for="n in notifications" :key="'n-' + n.id" class="announcement-card notif-card" :class="{ unread: !n.isRead }">
-          <span class="notif-close" :class="{ loading: deletingId === n.id }" @click="deleteNotif(n)" title="删除">×</span>
-          <div class="notif-body">
-            <h3>{{ n.title }}</h3>
-            <div class="content">{{ n.content }}</div>
-            <div class="time">{{ n.createdAt }}</div>
-          </div>
-        </el-card>
-      </template>
+      <h2 class="page-title">通知与公告</h2>
+      <div class="panel announcements-panel">
+        <h3 class="section-title">公告</h3>
+        <div class="panel-inner">
+          <el-empty v-if="!historyList.length && !historyLoading" description="暂无公告" />
+          <template v-else>
+            <el-card v-for="a in historyList" :key="'h-' + a.id" class="announcement-card">
+              <h3>{{ a.title }}</h3>
+              <div class="content">{{ a.content }}</div>
+              <div class="time">{{ a.createdAt }}</div>
+            </el-card>
+          </template>
+        </div>
+      </div>
+      <div class="panel notifications-panel">
+        <h3 class="section-title">站内通知</h3>
+        <div class="panel-inner">
+          <el-empty v-if="!notifications.length && !notifLoading" description="暂无站内通知" />
+          <template v-else>
+            <el-card v-for="n in notifications" :key="'n-' + n.id" class="announcement-card notif-card" :class="{ unread: !n.isRead }">
+              <span class="notif-close" :class="{ loading: deletingId === n.id }" @click="deleteNotif(n)" title="删除">×</span>
+              <div class="notif-body">
+                <h3>{{ n.title }}</h3>
+                <div class="content">{{ n.content }}</div>
+                <div class="time">{{ n.createdAt }}</div>
+              </div>
+            </el-card>
+          </template>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -237,14 +245,46 @@ async function deleteNotif(n: { id: number; title: string }) {
 
 <style scoped>
 .page {
-  min-height: calc(100vh - 120px);
+  height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
   max-width: 720px;
   margin: 0 auto;
 }
-.content-wrap { flex: 0 0 auto; }
-.section-title { font-size: 14px; color: #666; margin: 20px 0 10px; }
+.content-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.page-title { margin: 0 0 12px; font-size: 18px; font-weight: 600; flex-shrink: 0; }
+.panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  background: #fafafa;
+}
+.panel:first-of-type { margin-bottom: 12px; }
+.panel .section-title {
+  font-size: 14px;
+  color: #409eff;
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid #ebeef5;
+  background: #fff;
+  border-radius: 8px 8px 0 0;
+  flex-shrink: 0;
+}
+.panel-inner {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+}
 .announcement-card { margin-bottom: 16px; }
 .announcement-card.unread { border-left: 3px solid #409eff; }
 .announcement-card h3 { margin-bottom: 8px; }
