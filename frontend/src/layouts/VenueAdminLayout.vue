@@ -2,13 +2,12 @@
   <el-container class="layout">
     <el-header class="header">
       <span class="title">校园场地预约系统 - 场地管理员</span>
-      <el-menu mode="horizontal" :default-active="activeMenu" router>
-        <el-menu-item index="/venue-admin/applications">审核申请</el-menu-item>
-        <el-menu-item index="/venue-admin/venues">场地管理</el-menu-item>
-        <el-menu-item index="/venue-admin/announcements">公告</el-menu-item>
-        <el-menu-item index="/venue-admin/profile">个人主页</el-menu-item>
-        <el-button type="danger" link @click="logout">退出</el-button>
-      </el-menu>
+      <div class="nav-right">
+        <router-link to="/venue-admin/applications" class="tab" :class="{ active: activeMenu === '/venue-admin/applications' }">审核申请</router-link>
+        <router-link to="/venue-admin/venues" class="tab" :class="{ active: activeMenu === '/venue-admin/venues' }">场地管理</router-link>
+        <router-link to="/venue-admin/announcements" class="tab" :class="{ active: activeMenu === '/venue-admin/announcements' }">公告</router-link>
+        <router-link to="/venue-admin/profile" class="tab" :class="{ active: activeMenu === '/venue-admin/profile' }">个人主页</router-link>
+      </div>
     </el-header>
     <el-main>
       <router-view />
@@ -18,18 +17,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const router = useRouter();
-const store = useUserStore();
 const activeMenu = computed(() => route.path);
-
-function logout() {
-  store.logout();
-  router.push('/');
-}
 </script>
 
 <style scoped>
@@ -41,8 +32,23 @@ function logout() {
   background: #1e3a5f;
   color: #fff;
 }
-.title { margin-right: 24px; font-weight: bold; }
-.header .el-menu { background: transparent; border: none; }
-.header .el-menu-item { color: #fff; }
+.title { margin-right: auto; font-weight: bold; flex-shrink: 0; }
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+.nav-right .tab {
+  padding: 0 16px;
+  height: 60px;
+  line-height: 60px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.nav-right .tab:hover { background: rgba(255,255,255,0.1); }
+.nav-right .tab.active { background: rgba(255,255,255,0.15); font-weight: 500; }
 .el-main { padding: 20px; background: #f5f7fa; }
 </style>

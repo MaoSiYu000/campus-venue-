@@ -10,6 +10,7 @@
           <div class="name">{{ store.user?.name || '-' }}</div>
           <div class="account">工号 {{ store.user?.workId }}</div>
         </div>
+        <el-button class="edit-btn" @click="openEdit">编辑资料</el-button>
       </div>
       <el-descriptions :column="1" border class="profile-desc">
         <el-descriptions-item label="工号">{{ store.user?.workId }}</el-descriptions-item>
@@ -17,7 +18,6 @@
         <el-descriptions-item label="电话">{{ store.user?.phone || '-' }}</el-descriptions-item>
       </el-descriptions>
       <div class="actions">
-        <el-button @click="openEdit">编辑资料</el-button>
         <el-button type="primary" @click="$router.push('/venue-admin/change-password')">修改密码</el-button>
         <el-button type="danger" @click="logout">退出登录</el-button>
       </div>
@@ -126,8 +126,10 @@ onMounted(loadProfile);
 .profile-card { padding: 20px; }
 .profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
 .profile-header .avatar { flex-shrink: 0; }
+.profile-info { flex: 1; min-width: 0; }
 .profile-info .name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
 .profile-info .account { color: #909399; font-size: 13px; }
+.profile-header .edit-btn { flex-shrink: 0; margin-left: auto; }
 .profile-desc { margin-bottom: 20px; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .avatar-upload { display: flex; align-items: center; gap: 12px; }

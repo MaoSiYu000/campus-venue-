@@ -38,6 +38,14 @@ export class BookingApplicationController {
     return this.service.checkAvailability(venueId, useDate, startTime, endTime);
   }
 
+  @Get('venue-day-slots')
+  async getVenueDaySlots(
+    @Query('venue_id', ParseIntPipe) venueId: number,
+    @Query('use_date') useDate: string,
+  ) {
+    return this.service.getVenueDaySlots(venueId, useDate);
+  }
+
   @Get('my')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('user')

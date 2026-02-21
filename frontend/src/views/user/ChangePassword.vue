@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <el-card style="max-width: 480px; margin: 40px auto">
-      <template #header>首次登录请修改密码</template>
+      <template #header>{{ isFirstLogin ? '首次登录请修改密码' : '修改密码' }}</template>
       <el-form :model="form" label-width="100px" @submit.prevent="submit">
         <el-form-item label="原密码">
           <el-input v-model="form.oldPassword" type="password" placeholder="初始为身份证后六位" show-password />
@@ -21,14 +21,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { changePassword } from '@/api/auth';
 import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
+const route = useRoute();
 const store = useUserStore();
+const isFirstLogin = computed(() => route.query.first === '1');
 const loading = ref(false);
 const form = ref({ oldPassword: '', newPassword: '', confirm: '' });
 

@@ -2,14 +2,13 @@
   <el-container class="layout">
     <el-header class="header">
       <span class="title">校园场地预约系统 - 学生/老师</span>
-      <el-menu mode="horizontal" :default-active="activeMenu" router>
-        <el-menu-item index="/user/venue-list">场地列表</el-menu-item>
-        <el-menu-item index="/user/booking-apply">预约申请</el-menu-item>
-        <el-menu-item index="/user/my-bookings">我的预约</el-menu-item>
-        <el-menu-item index="/user/announcements">公告</el-menu-item>
-        <el-menu-item index="/user/profile">个人主页</el-menu-item>
-        <el-button type="danger" link @click="logout">退出</el-button>
-      </el-menu>
+      <div class="nav-right">
+        <router-link to="/user/venue-list" class="tab" :class="{ active: activeMenu === '/user/venue-list' }">场地列表</router-link>
+        <router-link to="/user/booking-apply" class="tab" :class="{ active: activeMenu === '/user/booking-apply' }">预约申请</router-link>
+        <router-link to="/user/my-bookings" class="tab" :class="{ active: activeMenu === '/user/my-bookings' }">我的预约</router-link>
+        <router-link to="/user/announcements" class="tab" :class="{ active: activeMenu === '/user/announcements' }">公告</router-link>
+        <router-link to="/user/profile" class="tab" :class="{ active: activeMenu === '/user/profile' }">个人主页</router-link>
+      </div>
     </el-header>
     <el-main>
       <router-view />
@@ -19,19 +18,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const router = useRouter();
-const store = useUserStore();
-
 const activeMenu = computed(() => route.path);
-
-function logout() {
-  store.logout();
-  router.push('/');
-}
 </script>
 
 <style scoped>
@@ -43,9 +33,23 @@ function logout() {
   background: #1e3a5f;
   color: #fff;
 }
-.title { margin-right: 24px; font-weight: bold; }
-.header .el-menu { background: transparent; border: none; }
-.header .el-menu-item { color: #fff; }
-.header .el-menu-item:hover { background: rgba(255,255,255,0.1); }
+.title { margin-right: auto; font-weight: bold; flex-shrink: 0; }
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+.nav-right .tab {
+  padding: 0 16px;
+  height: 60px;
+  line-height: 60px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.nav-right .tab:hover { background: rgba(255,255,255,0.1); }
+.nav-right .tab.active { background: rgba(255,255,255,0.15); font-weight: 500; }
 .el-main { padding: 20px; background: #f5f7fa; }
 </style>

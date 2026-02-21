@@ -14,7 +14,6 @@
       <el-table-column label="状态" width="100">
         <template #default="{ row }">
           <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
-          <span v-if="row.status === 'rejected' && row.rejectReason" class="reject">（{{ row.rejectReason }}）</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="140" fixed="right">
@@ -111,7 +110,3 @@ async function cancel(row: BookingApplication) {
 
 onMounted(load);
 </script>
-
-<style scoped>
-.reject { font-size: 12px; color: #f56c6c; }
-</style>

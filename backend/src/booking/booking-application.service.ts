@@ -73,7 +73,69 @@ export class BookingApplicationService {
     return { available: !conflict && slots.length === 0, conflict, hasUnavailableSlot: slots.length > 0, past: false };
   }
 
+  /** 某场地某日的预约占用与不可用时段（用于时间轴展示） */
+  async getVenueDaySlots(venueId: number, useDate: string) {
+    const dayStart = new Date(`${useDate} 00:00:00`);
+    const dayEnd = new Date(`${useDate} 23:59:59`);
+    const bookings = await this.repo.find({
+      where: {
+        venueId,
+        useDate,
+        status: In(['pending', 'approved']),
+      },
+      select: ['startTime', 'endTime', 'status', 'activityName'],
+      order: { startTime: 'ASC' },
+    });
+    const slots = await this.slotRepo
+      .createQueryBuilder('s')
+      .where('s.venue_id = :venueId', { venueId })
+      .andWhere('s.start_time < :dayEnd', { dayEnd })
+      .andWhere('s.end_time > :dayStart', { dayStart })
+      .getMany();
+    const unavailableSlots = slots.map((s) => {
+      const sStart = new Date(s.startTime);
+      const sEnd = new Date(s.endTime);
+      const start = sStart <= dayStart ? '00:00' : sStart.toTimeString().slice(0, 5);
+      const end = sEnd >= dayEnd ? '23:59' : sEnd.toTimeString().slice(0, 5);
+      return { startTime: start, endTime: end, reason: s.reason ?? undefined };
+    });
+    const toTimeStr = (t: string | Date): string => {
+      if (typeof t === 'string') return t.slice(0, 5);
+      return (t as Date).toTimeString().slice(0, 5);
+    };
+    return {
+      bookings: bookings.map((b) => ({
+        startTime: toTimeStr(b.startTime as string),
+        endTime: toTimeStr(b.endTime as string),
+        status: b.status,
+        activityName: b.activityName,
+      })),
+      unavailableSlots,
+    };
+  }
+
+  /** 同步过期状态：待审核且已过使用结束时间 → 已驳回(过了时间)；已通过且已过使用结束时间 → 已使用 */
+  private async syncStaleBookingStatuses(): Promise<void> {
+    const d = new Date();
+    const nowStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    await this.repo
+      .createQueryBuilder()
+      .update(BookingApplication)
+      .set({ status: 'rejected', rejectReason: '过了时间' })
+      .where('status = :status', { status: 'pending' })
+      .andWhere('CONCAT(use_date, " ", end_time) < :now', { now: nowStr })
+      .execute();
+    await this.repo
+      .createQueryBuilder()
+      .update(BookingApplication)
+      .set({ status: 'used' })
+      .where('status = :status', { status: 'approved' })
+      .andWhere('CONCAT(use_date, " ", end_time) < :now', { now: nowStr })
+      .execute();
+  }
+
   async findMyBookings(userId: number) {
+    await this.syncStaleBookingStatuses();
     return this.repo.find({
       where: { userId },
       relations: ['venue'],
@@ -82,6 +144,7 @@ export class BookingApplicationService {
   }
 
   async findOne(id: number, options?: { userId?: number; venueAdminId?: number; systemAdmin?: boolean }) {
+    await this.syncStaleBookingStatuses();
     const booking = await this.repo.findOne({
       where: { id },
       relations: ['venue', 'user', 'approvedByAdmin'],
@@ -109,6 +172,7 @@ export class BookingApplicationService {
 
   async findPendingByVenueIds(venueIds: number[]) {
     if (!venueIds.length) return [];
+    await this.syncStaleBookingStatuses();
     return this.repo.find({
       where: { venueId: In(venueIds), status: 'pending' },
       relations: ['venue', 'user'],
@@ -118,6 +182,7 @@ export class BookingApplicationService {
 
   async findHistoryByVenueIds(venueIds: number[]) {
     if (!venueIds.length) return [];
+    await this.syncStaleBookingStatuses();
     return this.repo.find({
       where: { venueId: In(venueIds) },
       relations: ['venue', 'user', 'approvedByAdmin'],
@@ -163,6 +228,7 @@ export class BookingApplicationService {
   }
 
   async findAllForSystemAdmin() {
+    await this.syncStaleBookingStatuses();
     return this.repo.find({
       relations: ['venue', 'user'],
       order: { useDate: 'DESC', startTime: 'DESC' },
@@ -171,6 +237,7 @@ export class BookingApplicationService {
 
   async getOverviewsByVenueIds(venueIds: number[]) {
     if (!venueIds.length) return [];
+    await this.syncStaleBookingStatuses();
     return this.repo.find({
       where: { venueId: In(venueIds), status: In(['pending', 'approved']) },
       relations: ['venue', 'user'],

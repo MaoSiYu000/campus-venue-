@@ -15,9 +15,11 @@ export class NotificationController {
   async list(
     @CurrentUser() user: CurrentUserPayload,
     @Query('unread_only') unreadOnly?: string,
+    @Query('limit') limit?: string,
   ) {
     const targetType = user.role === 'user' ? 'user' : 'venue_admin';
-    return this.service.findByTarget(targetType, user.id, unreadOnly === 'true');
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+    return this.service.findByTarget(targetType, user.id, unreadOnly === 'true', limitNum);
   }
 
   @Post('mark-read/:id')

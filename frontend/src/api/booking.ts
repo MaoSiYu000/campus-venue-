@@ -22,6 +22,17 @@ export function checkAvailability(venueId: number, useDate: string, startTime: s
   );
 }
 
+export interface VenueDaySlot {
+  bookings: { startTime: string; endTime: string; status: string; activityName: string }[];
+  unavailableSlots: { startTime: string; endTime: string; reason?: string }[];
+}
+
+export function getVenueDaySlots(venueId: number, useDate: string) {
+  return request.get<VenueDaySlot>('/booking-applications/venue-day-slots', {
+    params: { venue_id: venueId, use_date: useDate },
+  });
+}
+
 export function createBooking(data: CreateBookingDto) {
   return request.post<BookingApplication>('/booking-applications', data);
 }

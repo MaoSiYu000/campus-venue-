@@ -11,9 +11,9 @@
           </el-select>
         </el-form-item>
         <el-form-item label="容量">
-          <el-input-number v-model="filters.min_capacity" :min="0" placeholder="最小" style="width: 100px" />
-          -
-          <el-input-number v-model="filters.max_capacity" :min="0" placeholder="最大" style="width: 100px" />
+          <el-input-number v-model="filters.min_capacity" :min="0" placeholder="最小" style="width: 132px" />
+          <span class="capacity-sep">——</span>
+          <el-input-number v-model="filters.max_capacity" :min="0" placeholder="最大" style="width: 132px" />
         </el-form-item>
         <el-form-item label="位置">
           <el-input v-model="filters.location" placeholder="楼栋/区域" clearable style="width: 140px" />
@@ -120,6 +120,7 @@ onMounted(load);
 </script>
 
 <style scoped>
+.capacity-sep { margin: 0 6px; color: #999; user-select: none; }
 .venue-card { cursor: pointer; margin-bottom: 16px; }
 .venue-photo-wrap { margin: -20px -20px 12px -20px; border-radius: 4px 4px 0 0; overflow: hidden; }
 .venue-photo { width: 100%; height: 140px; object-fit: cover; display: block; }

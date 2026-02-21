@@ -58,7 +58,7 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.guest && store.isLoggedIn) {
     const r = store.role;
     if (r === 'user') {
-      if (store.mustChangePassword) return next('/user/change-password');
+      if (store.mustChangePassword) return next('/user/change-password?first=1');
       return next('/user/announcements');
     }
     if (r === 'venue_admin') return next('/venue-admin/announcements');

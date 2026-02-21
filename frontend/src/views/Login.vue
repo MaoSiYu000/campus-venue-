@@ -17,9 +17,9 @@
           v-for="(src, i) in bgImages"
           :key="i"
           class="carousel-slide"
-          :class="{ active: currentSlide === i }"
+          :class="{ active: currentSlide === i, 'img-failed': imgFailed[i] }"
         >
-          <img :src="src" alt="" decoding="async" />
+          <img :src="src" alt="" decoding="async" @error="onImgError(i)" />
         </div>
       </div>
 
@@ -83,14 +83,24 @@ const accountPlaceholder = computed(() => {
 });
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const bgImages = ref<string[]>([`${base}/images/1.jpg`, `${base}/images/2.jpg`]);
+const bgImages = ref<string[]>([
+  `${base}/images/1.png`,
+  `${base}/images/2.png`,
+  `${base}/images/3.png`,
+  `${base}/images/4.jpg`,
+]);
 const currentSlide = ref(0);
+const imgFailed = ref<Record<number, boolean>>({});
 let timer: ReturnType<typeof setInterval> | null = null;
 const TOUCH_THRESHOLD = 50;
 let touchStartX = 0;
 let touchEndX = 0;
 let mouseStartX = 0;
 let mouseEndX = 0;
+
+function onImgError(index: number) {
+  imgFailed.value = { ...imgFailed.value, [index]: true };
+}
 
 function goSlide(next: number) {
   const len = bgImages.value.length;
@@ -158,7 +168,7 @@ async function onSubmit() {
     store.setLogin(payload);
     const role = payload?.role ?? (data as any)?.role;
     if (role === 'user') {
-      if (payload?.mustChangePassword) router.replace('/user/change-password');
+      if (payload?.mustChangePassword) router.replace('/user/change-password?first=1');
       else router.replace('/user/announcements');
     } else if (role === 'venue_admin') {
       router.replace('/venue-admin/announcements');
@@ -189,7 +199,8 @@ async function onSubmit() {
   align-items: center;
   justify-content: flex-start;
   padding-left: clamp(20px, 5vw, 56px);
-  background: #1e3a5f;
+  background: rgba(45, 90, 135, 0.7);
+  backdrop-filter: blur(8px);
   color: #fff;
 }
 
@@ -234,6 +245,13 @@ async function onSubmit() {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.carousel-slide.img-failed {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #1e3a5f 100%);
+}
+.carousel-slide.img-failed img {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .carousel-fallback {

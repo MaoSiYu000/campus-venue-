@@ -26,13 +26,19 @@ export class NotificationService {
     return this.repo.save(n);
   }
 
-  async findByTarget(targetType: string, targetId: number, unreadOnly = false) {
+  async findByTarget(
+    targetType: string,
+    targetId: number,
+    unreadOnly = false,
+    limit?: number,
+  ) {
     const qb = this.repo
       .createQueryBuilder('n')
       .where('n.target_type = :targetType', { targetType })
       .andWhere('n.target_id = :targetId', { targetId })
       .orderBy('n.created_at', 'DESC');
     if (unreadOnly) qb.andWhere('n.is_read = 0');
+    if (limit != null && limit > 0) qb.take(limit);
     return qb.getMany();
   }
 
