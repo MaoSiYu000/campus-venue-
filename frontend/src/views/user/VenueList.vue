@@ -47,7 +47,10 @@
           <div class="meta">
             设备：{{ v.hasProjector ? '投影 ' : '' }}{{ v.hasSound ? '音响' : '' }} {{ !v.hasProjector && !v.hasSound ? '无' : '' }}
           </div>
-          <el-tag :type="v.isAvailable ? 'success' : 'info'" size="small">{{ v.isAvailable ? '可用' : '不可用' }}</el-tag>
+          <div class="card-footer">
+            <el-tag :type="v.isAvailable ? 'success' : 'info'" size="small">{{ v.isAvailable ? '可用' : '不可用' }}</el-tag>
+            <el-button v-if="v.isAvailable" type="primary" size="small" class="btn-booking" @click.stop="goBookingApply(v.id)">预约此场地</el-button>
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -116,6 +119,10 @@ function goDetail(id: number) {
   router.push(`/user/venue/${id}`);
 }
 
+function goBookingApply(venueId: number) {
+  router.push({ path: '/user/booking-apply', query: { venueId: String(venueId) } });
+}
+
 onMounted(load);
 </script>
 
@@ -127,4 +134,6 @@ onMounted(load);
 .venue-photo.placeholder { height: 140px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #999; }
 .venue-card .name { font-weight: bold; margin-bottom: 8px; }
 .venue-card .meta { font-size: 12px; color: #666; margin: 4px 0; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.venue-card .btn-booking { flex-shrink: 0; }
 </style>

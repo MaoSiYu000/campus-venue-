@@ -89,7 +89,7 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { getVenueList } from '@/api/venue';
+import { getVenueList, getVenue } from '@/api/venue';
 import { checkAvailability, createBooking } from '@/api/booking';
 import { uploadProposal } from '@/api/upload';
 import type { Venue } from '@/types';
@@ -118,7 +118,24 @@ onMounted(async () => {
   const all = await getVenueList({});
   venues.value = Array.isArray(all) ? all.filter((v) => v.isAvailable) : [];
   const q = route.query.venueId;
-  if (q) form.venueId = Number(q);
+  if (q != null && q !== '') {
+    const idFromQuery = Number(q);
+    if (!Number.isInteger(idFromQuery) || idFromQuery <= 0) return;
+    let found = venues.value.find((v) => Number(v.id) === idFromQuery || v.id === idFromQuery);
+    if (found) {
+      form.venueId = found.id as number;
+    } else {
+      try {
+        const venue = await getVenue(idFromQuery);
+        if (venue) {
+          venues.value = [venue, ...venues.value];
+          form.venueId = venue.id;
+        }
+      } catch {
+        // 该场地不存在或无权查看，忽略
+      }
+    }
+  }
 });
 
 watch(
