@@ -42,6 +42,9 @@ export const useUserStore = defineStore('user', () => {
       username: (data as any).username,
       name: (data as any).name,
       phone: (data as any).phone,
+      college: (data as any).college,
+      major: (data as any).major,
+      class: (data as any).class,
       avatar: (data as any).avatar,
       mustChangePassword: (data as any).mustChangePassword,
     };
@@ -55,10 +58,13 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  function setProfile(partial: Partial<Pick<LoginUser, 'name' | 'phone' | 'avatar'>>) {
+  function setProfile(partial: Partial<Pick<LoginUser, 'name' | 'phone' | 'college' | 'major' | 'class' | 'avatar'>>) {
     if (!user.value) return;
     if (partial.name !== undefined) user.value.name = partial.name;
     if (partial.phone !== undefined) user.value.phone = partial.phone;
+    if (partial.college !== undefined) user.value.college = partial.college;
+    if (partial.major !== undefined) user.value.major = partial.major;
+    if (partial.class !== undefined) user.value.class = partial.class;
     if (partial.avatar !== undefined) user.value.avatar = partial.avatar;
     localStorage.setItem('user', JSON.stringify(user.value));
   }

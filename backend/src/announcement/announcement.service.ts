@@ -47,6 +47,13 @@ export class AnnouncementService {
     return this.repo.find({ order: { createdAt: 'DESC' } });
   }
 
+  async findByCreatedBy(systemAdminId: number) {
+    return this.repo.find({
+      where: { createdBy: systemAdminId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findReadMustRead(userId: number, role: 'user' | 'venue_admin') {
     const mustRead = await this.findMustRead(role);
     const readIds = await this.readRepo

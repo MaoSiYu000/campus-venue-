@@ -42,6 +42,13 @@ npm run seed
 npm run start:dev
 ```
 
+若已使用旧版数据库，需执行一次迁移以支持个人资料中的学院/专业/班级与头像功能，否则访问个人主页或上传头像可能报 500：
+
+```bash
+cd backend
+mysql -u root -p campus_venue < scripts/add-user-profile-fields.sql
+```
+
 环境变量（可选，在 `backend` 目录下建 `.env`）：
 
 ```

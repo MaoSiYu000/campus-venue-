@@ -43,6 +43,13 @@ export class AnnouncementController {
     return this.service.findAll();
   }
 
+  @Get('my')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('system_admin')
+  async myAnnouncements(@CurrentUser() user: CurrentUserPayload) {
+    return this.service.findByCreatedBy(user.id);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('system_admin')

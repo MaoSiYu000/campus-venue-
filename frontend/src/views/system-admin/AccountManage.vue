@@ -1,7 +1,8 @@
 <template>
-  <div class="page">
-    <h2>账号管理</h2>
-    <div class="toolbar">
+  <div class="page account-manage-page">
+    <h2 class="page-title">账号管理</h2>
+
+    <div class="toolbar card-toolbar">
       <div class="toolbar-row">
         <span class="toolbar-label">添加</span>
         <el-button @click="openAddAccount">手动添加</el-button>
@@ -18,39 +19,63 @@
         <el-button :disabled="selectedUserIds.length === 0 && selectedVenueAdminIds.length === 0" @click="clearWithConfirm('selected')">删除选中</el-button>
       </div>
     </div>
-    <el-tabs v-model="activeTab">
-      <el-tab-pane label="学生/老师" name="users">
-        <el-table :data="users" border @selection-change="onUserSelectionChange">
-          <el-table-column type="selection" width="50" />
-          <el-table-column prop="id" label="ID" width="70" />
-          <el-table-column prop="studentId" label="学号" width="120" />
-          <el-table-column prop="name" label="姓名" width="100" />
-          <el-table-column prop="phone" label="电话" />
-          <el-table-column label="操作" width="140">
-            <template #default="{ row }">
-              <el-button link type="primary" @click="openNotify('user', row.id, row.studentId)">发送通知</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-      <el-tab-pane label="场地管理员" name="venueAdmins">
-        <el-table :data="venueAdmins" border @selection-change="onVenueAdminSelectionChange">
-          <el-table-column type="selection" width="50" />
-          <el-table-column prop="id" label="ID" width="70" />
-          <el-table-column prop="workId" label="工号" width="100" />
-          <el-table-column prop="name" label="姓名" width="100" />
-          <el-table-column label="管辖场地">
-            <template #default="{ row }">{{ (row.venues || []).map((v: any) => v.name).join('、') || '-' }}</template>
-          </el-table-column>
-          <el-table-column label="操作" width="200">
-            <template #default="{ row }">
-              <el-button link type="primary" @click="openNotify('venue_admin', row.id, row.workId)">发送通知</el-button>
-              <el-button link @click="openScope(row)">管辖范围</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-    </el-tabs>
+
+    <div class="filter-bar card-filter">
+      <div class="filter-title">筛选条件</div>
+      <el-form :model="filters" inline class="filter-form">
+        <el-form-item :label="activeTab === 'users' ? '学号' : '工号'">
+          <el-input
+            v-model="filters.keywordId"
+            :placeholder="activeTab === 'users' ? '学号关键词' : '工号关键词'"
+            clearable
+            style="width: 140px"
+          />
+        </el-form-item>
+        <el-form-item label="姓名">
+          <el-input v-model="filters.keywordName" placeholder="姓名关键词" clearable style="width: 140px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="applyFilter">查询</el-button>
+          <el-button @click="resetFilter">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
+    <div class="table-wrap">
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="学生/老师" name="users">
+          <el-table :data="filteredUsers" border stripe @selection-change="onUserSelectionChange">
+            <el-table-column type="selection" width="50" />
+            <el-table-column prop="id" label="ID" width="70" />
+            <el-table-column prop="studentId" label="学号" width="120" />
+            <el-table-column prop="name" label="姓名" width="100" />
+            <el-table-column prop="phone" label="电话" />
+            <el-table-column label="操作" width="140">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openNotify('user', row.id, row.studentId)">发送通知</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="场地管理员" name="venueAdmins">
+          <el-table :data="filteredVenueAdmins" border stripe @selection-change="onVenueAdminSelectionChange">
+            <el-table-column type="selection" width="50" />
+            <el-table-column prop="id" label="ID" width="70" />
+            <el-table-column prop="workId" label="工号" width="100" />
+            <el-table-column prop="name" label="姓名" width="100" />
+            <el-table-column label="管辖场地">
+              <template #default="{ row }">{{ (row.venues || []).map((v: any) => v.name).join('、') || '-' }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="200">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openNotify('venue_admin', row.id, row.workId)">发送通知</el-button>
+                <el-button link @click="openScope(row)">管辖范围</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
     <el-dialog v-model="notifyVisible" title="发送通知" width="440px">
       <el-form :model="notifyForm" label-width="80px">
         <el-form-item label="标题"><el-input v-model="notifyForm.title" /></el-form-item>
@@ -117,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { getUsers, getVenueAdmins, notifyUser, notifyVenueAdmin, updateVenueAdminScope, clearAccounts, ensureTestAccounts, createUser, createVenueAdmin, downloadImportTemplate, importAccounts } from '@/api/system-admin';
 import { getVenueList } from '@/api/venue';
@@ -128,6 +153,38 @@ const venueAdmins = ref<any[]>([]);
 const allVenues = ref<any[]>([]);
 const selectedUserIds = ref<number[]>([]);
 const selectedVenueAdminIds = ref<number[]>([]);
+
+const filters = reactive({
+  keywordId: '',
+  keywordName: '',
+});
+
+const filteredUsers = computed(() => {
+  let result = [...users.value];
+  const kid = (filters.keywordId || '').trim().toLowerCase();
+  const kn = (filters.keywordName || '').trim().toLowerCase();
+  if (kid) result = result.filter((u) => (u.studentId || '').toLowerCase().includes(kid));
+  if (kn) result = result.filter((u) => (u.name || '').toLowerCase().includes(kn));
+  return result;
+});
+
+const filteredVenueAdmins = computed(() => {
+  let result = [...venueAdmins.value];
+  const kid = (filters.keywordId || '').trim().toLowerCase();
+  const kn = (filters.keywordName || '').trim().toLowerCase();
+  if (kid) result = result.filter((u) => (u.workId || '').toLowerCase().includes(kid));
+  if (kn) result = result.filter((u) => (u.name || '').toLowerCase().includes(kn));
+  return result;
+});
+
+function applyFilter() {
+  // 筛选由 computed 实时生效，无需额外逻辑
+}
+
+function resetFilter() {
+  filters.keywordId = '';
+  filters.keywordName = '';
+}
 const clearConfirmVisible = ref(false);
 const clearMode = ref<'keepTest' | 'clearAll' | 'selected'>('keepTest');
 const clearScope = ref<'users' | 'venue_admins' | 'both'>('both');
@@ -334,9 +391,53 @@ onMounted(load);
 </script>
 
 <style scoped>
-.toolbar { margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+.account-manage-page {
+  padding: 16px 20px;
+  background: #f5f7fa;
+  min-height: 100%;
+}
+.page-title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+.card-toolbar,
+.card-filter {
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.card-toolbar {
+  padding: 14px 16px;
+}
+.toolbar { display: flex; flex-direction: column; gap: 10px; }
 .toolbar-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.toolbar-label { margin-right: 8px; color: var(--el-text-color-secondary); font-size: 13px; min-width: 36px; }
+.toolbar-label { margin-right: 8px; color: #909399; font-size: 13px; min-width: 36px; }
+
+.filter-bar { margin-bottom: 16px; }
+.filter-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ebeef5;
+}
+.filter-form :deep(.el-form-item) { margin-bottom: 0; margin-right: 16px; }
+.filter-form :deep(.el-form-item__label) { color: #606266; }
+
+.table-wrap {
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  padding: 16px;
+}
+.table-wrap :deep(.el-table) { font-size: 13px; }
+.table-wrap :deep(.el-table th) { background: #f5f7fa; color: #606266; font-weight: 500; }
+
 .clear-dialog-desc { margin: 0 0 8px; color: var(--el-text-color-regular); }
 .clear-scope-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 </style>

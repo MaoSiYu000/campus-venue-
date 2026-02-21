@@ -9,6 +9,9 @@ export interface LoginUser {
   username?: string;
   name?: string;
   phone?: string;
+  college?: string;
+  major?: string;
+  class?: string;
   avatar?: string;
   mustChangePassword?: boolean;
 }
@@ -58,6 +61,7 @@ export interface Announcement {
   title: string;
   content: string;
   isMustRead: number;
+  createdBy?: number | null;
   createdAt: string;
 }
 

@@ -49,6 +49,9 @@ export class AuthService {
         studentId: user.studentId,
         name: user.name,
         phone: user.phone ?? null,
+        college: user.college ?? null,
+        major: user.major ?? null,
+        class: user.class ?? null,
         avatar: user.avatar ?? null,
         mustChangePassword: !!user.mustChangePassword,
       };
@@ -144,9 +147,9 @@ export class AuthService {
 
   async getProfile(role: RoleType, id: number) {
     if (role === 'user') {
-      const user = await this.userRepo.findOne({ where: { id }, select: ['id', 'studentId', 'name', 'phone', 'avatar'] });
+      const user = await this.userRepo.findOne({ where: { id }, select: ['id', 'studentId', 'name', 'phone', 'college', 'major', 'class', 'avatar'] });
       if (!user) return null;
-      return { role: 'user', id: user.id, studentId: user.studentId, name: user.name, phone: user.phone, avatar: user.avatar };
+      return { role: 'user', id: user.id, studentId: user.studentId, name: user.name, phone: user.phone, college: user.college, major: user.major, class: user.class, avatar: user.avatar };
     }
     if (role === 'venue_admin') {
       const admin = await this.venueAdminRepo.findOne({ where: { id }, select: ['id', 'workId', 'name', 'phone', 'avatar'] });
@@ -161,12 +164,15 @@ export class AuthService {
     return null;
   }
 
-  async updateProfile(role: RoleType, id: number, dto: { name?: string; phone?: string; avatar?: string }) {
+  async updateProfile(role: RoleType, id: number, dto: { name?: string; phone?: string; college?: string; major?: string; class?: string; avatar?: string }) {
     if (role === 'user') {
       const user = await this.userRepo.findOne({ where: { id } });
       if (!user) throw new UnauthorizedException('用户不存在');
       if (dto.name !== undefined) user.name = dto.name || null;
       if (dto.phone !== undefined) user.phone = dto.phone || null;
+      if (dto.college !== undefined) user.college = dto.college || null;
+      if (dto.major !== undefined) user.major = dto.major || null;
+      if (dto.class !== undefined) user.class = dto.class || null;
       if (dto.avatar !== undefined) user.avatar = dto.avatar || null;
       await this.userRepo.save(user);
       return this.getProfile('user', id);

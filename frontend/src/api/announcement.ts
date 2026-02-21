@@ -17,6 +17,11 @@ export function getAnnouncementList(): Promise<Announcement[]> {
   return request.get('/announcements') as Promise<Announcement[]>;
 }
 
+/** 系统管理员：我发布的公告（用于个人主页近期活动） */
+export function getMyAnnouncements(): Promise<Announcement[]> {
+  return request.get<Announcement[]>('/announcements/my');
+}
+
 export function createAnnouncement(data: { title: string; content: string; isMustRead: boolean; targetRole?: 'user' | 'venue_admin' | 'all' }) {
   return request.post<Announcement>('/announcements', data);
 }

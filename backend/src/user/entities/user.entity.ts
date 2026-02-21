@@ -18,6 +18,15 @@ export class User {
   @Column({ type: 'varchar', length: 32, nullable: true })
   phone: string | null;
 
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  college: string | null;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  major: string | null;
+
+  @Column({ name: 'class', type: 'varchar', length: 32, nullable: true })
+  class: string | null;
+
   @Column({ type: 'varchar', length: 255, nullable: true })
   avatar: string | null;
 

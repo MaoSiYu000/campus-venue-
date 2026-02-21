@@ -1,6 +1,6 @@
 <template>
   <div class="page venue-manage-page">
-    <h2 class="page-title">场地管理（全局）</h2>
+    <h2 class="page-title">场地管理</h2>
 
     <div class="toolbar card-toolbar">
       <div class="toolbar-row">

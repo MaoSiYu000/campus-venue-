@@ -9,9 +9,11 @@ import { Roles } from '../auth/decorators/roles.decorator';
 
 const uploadDir = process.env.UPLOAD_DIR || 'uploads';
 const venuePhotoDir = `./${uploadDir}/venues`;
-if (!existsSync(venuePhotoDir)) {
-  mkdirSync(venuePhotoDir, { recursive: true });
-}
+const avatarsDir = `./${uploadDir}/avatars`;
+const proposalsDir = `./${uploadDir}/proposals`;
+[venuePhotoDir, avatarsDir, proposalsDir].forEach((dir) => {
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+});
 
 
 @Controller('upload')
