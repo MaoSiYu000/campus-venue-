@@ -32,6 +32,9 @@ const activeMenu = computed(() => route.path);
   justify-content: space-between;
   background: #1e3a5f;
   color: #fff;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 .title { margin-right: auto; font-weight: bold; flex-shrink: 0; }
 .nav-right {
@@ -48,8 +51,13 @@ const activeMenu = computed(() => route.path);
   text-decoration: none;
   font-size: 14px;
   white-space: nowrap;
+  position: relative;
+  border-bottom: 3px solid transparent;
+  box-sizing: border-box;
 }
-.nav-right .tab:hover { background: rgba(255,255,255,0.1); }
-.nav-right .tab.active { background: rgba(255,255,255,0.15); font-weight: 500; }
+.nav-right .tab:hover {
+  background: rgba(255,255,255,0.1);
+  border-bottom-color: rgba(255,255,255,0.8);
+}
 .el-main { padding: 20px; background: #f5f7fa; }
 </style>
