@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -164,7 +164,7 @@ export class AuthService {
     return null;
   }
 
-  async updateProfile(role: RoleType, id: number, dto: { name?: string; phone?: string; college?: string; major?: string; class?: string; avatar?: string }) {
+  async updateProfile(role: RoleType, id: number, dto: { name?: string; username?: string; phone?: string; college?: string; major?: string; class?: string; avatar?: string }) {
     if (role === 'user') {
       const user = await this.userRepo.findOne({ where: { id } });
       if (!user) throw new UnauthorizedException('用户不存在');
@@ -189,6 +189,13 @@ export class AuthService {
     if (role === 'system_admin') {
       const admin = await this.systemAdminRepo.findOne({ where: { id } });
       if (!admin) throw new UnauthorizedException('账号不存在');
+      if (dto.username !== undefined) {
+        const trimmed = (dto.username || '').trim();
+        if (!trimmed) throw new BadRequestException('用户名不能为空');
+        const existing = await this.systemAdminRepo.findOne({ where: { username: trimmed } });
+        if (existing && existing.id !== id) throw new BadRequestException('该用户名已被使用');
+        admin.username = trimmed;
+      }
       if (dto.phone !== undefined) admin.phone = dto.phone || null;
       if (dto.avatar !== undefined) admin.avatar = dto.avatar || null;
       await this.systemAdminRepo.save(admin);

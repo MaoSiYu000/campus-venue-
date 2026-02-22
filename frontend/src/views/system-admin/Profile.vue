@@ -61,6 +61,7 @@
 
     <el-dialog v-model="editVisible" title="编辑资料" width="420px" @close="cancelEdit">
       <el-form :model="editForm" label-width="80px">
+        <el-form-item label="用户名"><el-input v-model="editForm.username" placeholder="登录用户名" /></el-form-item>
         <el-form-item label="电话"><el-input v-model="editForm.phone" placeholder="选填" /></el-form-item>
         <el-form-item label="头像">
           <div class="avatar-upload">
@@ -94,7 +95,7 @@ const store = useUserStore();
 const editVisible = ref(false);
 const saving = ref(false);
 const recentLoading = ref(false);
-const editForm = reactive({ phone: '', avatar: '' });
+const editForm = reactive({ username: '', phone: '', avatar: '' });
 
 const avatarUrl = computed(() => store.user?.avatar || '');
 const editAvatarTs = ref(0);
@@ -112,6 +113,7 @@ function formatDate(s: string) {
 }
 
 function openEdit() {
+  editForm.username = store.user?.username ?? '';
   editForm.phone = store.user?.phone ?? '';
   editForm.avatar = store.user?.avatar ?? '';
   editVisible.value = true;
@@ -139,10 +141,22 @@ async function onAvatarSelect(file: File) {
 }
 
 async function saveEdit() {
+  if (!(editForm.username || '').trim()) {
+    ElMessage.warning('用户名不能为空');
+    return;
+  }
   saving.value = true;
   try {
-    await updateProfile({ phone: editForm.phone || undefined, avatar: editForm.avatar || undefined });
-    store.setProfile({ phone: editForm.phone || undefined, avatar: editForm.avatar || undefined });
+    await updateProfile({
+      username: editForm.username?.trim() || undefined,
+      phone: editForm.phone || undefined,
+      avatar: editForm.avatar || undefined,
+    });
+    store.setProfile({
+      username: editForm.username?.trim() || undefined,
+      phone: editForm.phone || undefined,
+      avatar: editForm.avatar || undefined,
+    });
     ElMessage.success('已保存');
     editVisible.value = false;
   } catch (e: any) {
@@ -155,7 +169,7 @@ async function saveEdit() {
 async function loadProfile() {
   try {
     const p = (await getProfile()) as any;
-    if (p) store.setProfile({ phone: p.phone, avatar: p.avatar });
+    if (p) store.setProfile({ username: p.username, phone: p.phone, avatar: p.avatar });
   } catch (_) {}
 }
 
@@ -165,7 +179,7 @@ async function loadRecentActivities() {
     const list = await getMyAnnouncements();
     const arr = Array.isArray(list) ? list : [];
     const sorted = [...arr].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-    recentAnnouncements.value = sorted.slice(0, 5) as Announcement[];
+    recentAnnouncements.value = sorted.slice(0, 7) as Announcement[];
   } catch (_) {
     recentAnnouncements.value = [];
   } finally {

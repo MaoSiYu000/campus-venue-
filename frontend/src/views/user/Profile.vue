@@ -52,7 +52,7 @@
           </div>
         </el-card>
 
-        <!-- 下部分：近期活动（最多 5 条预约） -->
+        <!-- 下部分：近期活动（最多 7 条预约） -->
         <el-card class="recent-card" shadow="hover">
           <template #header>
             <span class="card-title">近期活动</span>
@@ -229,7 +229,7 @@ async function loadRecentBookings() {
       if (d !== 0) return d;
       return (b.createdAt || '').localeCompare(a.createdAt || '');
     });
-    recentBookings.value = sorted.slice(0, 5);
+    recentBookings.value = sorted.slice(0, 7);
   } catch (_) {
     recentBookings.value = [];
   } finally {

@@ -207,7 +207,7 @@ async function loadRecentActivities() {
       const t2 = getApprovedAt(b) || (b.createdAt ?? '');
       return t2.localeCompare(t1);
     });
-    recentActions.value = sorted.slice(0, 5) as BookingApplication[];
+    recentActions.value = sorted.slice(0, 7) as BookingApplication[];
   } catch (_) {
     recentActions.value = [];
   } finally {

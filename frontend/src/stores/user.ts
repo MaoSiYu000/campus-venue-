@@ -58,9 +58,10 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  function setProfile(partial: Partial<Pick<LoginUser, 'name' | 'phone' | 'college' | 'major' | 'class' | 'avatar'>>) {
+  function setProfile(partial: Partial<Pick<LoginUser, 'name' | 'username' | 'phone' | 'college' | 'major' | 'class' | 'avatar'>>) {
     if (!user.value) return;
     if (partial.name !== undefined) user.value.name = partial.name;
+    if (partial.username !== undefined) user.value.username = partial.username;
     if (partial.phone !== undefined) user.value.phone = partial.phone;
     if (partial.college !== undefined) user.value.college = partial.college;
     if (partial.major !== undefined) user.value.major = partial.major;

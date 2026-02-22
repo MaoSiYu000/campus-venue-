@@ -9,7 +9,7 @@ export function getProfile() {
   return request.get<Record<string, unknown>>('/auth/profile');
 }
 
-export function updateProfile(data: { name?: string; phone?: string; college?: string; major?: string; class?: string; avatar?: string }) {
+export function updateProfile(data: { name?: string; username?: string; phone?: string; college?: string; major?: string; class?: string; avatar?: string }) {
   return request.patch<Record<string, unknown>>('/auth/profile', data);
 }
 
