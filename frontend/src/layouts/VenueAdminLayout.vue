@@ -4,6 +4,7 @@
       <span class="title">校园场地预约系统 - 场地管理员</span>
       <div class="nav-right">
         <router-link to="/venue-admin/applications" class="tab" :class="{ active: activeMenu === '/venue-admin/applications' }">审核申请</router-link>
+        <router-link to="/venue-admin/overview" class="tab" :class="{ active: activeMenu === '/venue-admin/overview' }">预约总览</router-link>
         <router-link to="/venue-admin/venues" class="tab" :class="{ active: activeMenu === '/venue-admin/venues' }">场地管理</router-link>
         <router-link to="/venue-admin/announcements" class="tab" :class="{ active: activeMenu === '/venue-admin/announcements' }">公告</router-link>
         <router-link to="/venue-admin/profile" class="tab" :class="{ active: activeMenu === '/venue-admin/profile' }">个人主页</router-link>

@@ -227,13 +227,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 负边距抵消布局 padding，底纹从页眉下铺满整页 */
 .profile-page {
+  margin: -20px;
+  width: calc(100% + 40px);
+  min-height: calc(100vh - 60px);
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  box-sizing: border-box;
+  background-image: url('/images/底纹.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .profile-layout {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   gap: 24px;
   align-items: flex-start;

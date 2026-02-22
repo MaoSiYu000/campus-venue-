@@ -76,7 +76,7 @@ export class BookingApplicationController {
 
   @Get('all')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('system_admin')
+  @Roles('system_admin', 'venue_admin')
   async all() {
     return this.service.findAllForSystemAdmin();
   }
@@ -124,7 +124,7 @@ export class BookingApplicationController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('system_admin')
+  @Roles('system_admin', 'venue_admin')
   async deleteBySystemAdmin(@Param('id', ParseIntPipe) id: number) {
     return this.service.deleteBySystemAdmin(id);
   }

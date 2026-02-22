@@ -1,6 +1,9 @@
 <template>
   <div class="page">
-    <h2>场地列表</h2>
+    <header class="page-banner">
+      <h2>场地列表</h2>
+    </header>
+    <div class="page-content">
     <el-card class="filter-card">
       <el-form :inline="true" :model="filters">
         <el-form-item label="类型">
@@ -55,6 +58,7 @@
       </el-col>
     </el-row>
     <el-empty v-if="!loading && !list.length" description="暂无场地" />
+    </div>
   </div>
 </template>
 
@@ -127,6 +131,24 @@ onMounted(load);
 </script>
 
 <style scoped>
+.page { min-height: 100%; padding: 0; }
+.page-banner {
+  height: 18.75vh;
+  min-height: 90px;
+  margin: -20px -20px 0 -20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 6.25%;
+  background-color: #e8f4ff;
+  background-image: url(/images/页面底纹.png), linear-gradient(180deg, #e8f4ff 0%, #f0f7ff 100%);
+  background-size: 100% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+}
+.page-banner h2 { margin: 0; font-size: 32px; color: #1e3a5f; position: relative; z-index: 1; }
+.page-content { padding: 16px; }
 .capacity-sep { margin: 0 6px; color: #999; user-select: none; }
 .venue-card { cursor: pointer; margin-bottom: 16px; }
 .venue-photo-wrap { margin: -20px -20px 12px -20px; border-radius: 4px 4px 0 0; overflow: hidden; }

@@ -32,7 +32,7 @@ const router = createRouter({
         { path: 'applications', name: 'ReviewApplications', component: () => import('@/views/venue-admin/ReviewApplications.vue') },
         { path: 'pending', redirect: '/venue-admin/applications' },
         { path: 'history', redirect: '/venue-admin/applications' },
-        { path: 'overview', redirect: '/venue-admin/applications' },
+        { path: 'overview', name: 'VenueAdminOverview', component: () => import('@/views/venue-admin/BookingOverview.vue') },
         { path: 'venues', name: 'VenueAdminVenues', component: () => import('@/views/venue-admin/VenueManage.vue') },
       ],
     },

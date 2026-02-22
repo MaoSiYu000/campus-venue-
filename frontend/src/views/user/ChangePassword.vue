@@ -13,7 +13,8 @@
           <el-input v-model="form.confirm" type="password" show-password />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" @click="submit">确认修改</el-button>
+          <el-button type="primary" :loading="loading" @click="submit" class="btn-fixed">确认修改</el-button>
+          <el-button @click="goBack" class="btn-fixed">取消</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -33,6 +34,10 @@ const store = useUserStore();
 const isFirstLogin = computed(() => route.query.first === '1');
 const loading = ref(false);
 const form = ref({ oldPassword: '', newPassword: '', confirm: '' });
+
+function goBack() {
+  router.push('/user/profile');
+}
 
 async function submit() {
   if (form.value.newPassword.length < 6) {
@@ -59,4 +64,5 @@ async function submit() {
 
 <style scoped>
 .page { min-height: 60vh; }
+.btn-fixed { min-width: 100px; }
 </style>
