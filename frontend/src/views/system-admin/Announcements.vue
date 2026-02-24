@@ -27,7 +27,14 @@
     <h3 style="margin-top: 24px">历史公告</h3>
     <el-table :data="list" border>
       <el-table-column prop="title" label="标题" />
-      <el-table-column prop="createdAt" label="发布时间" width="180" />
+      <el-table-column prop="createdAt" label="发布时间" width="120">
+        <template #default="{ row }">
+          <div class="date-time-cell">
+            <div class="date-line">{{ formatDate(row.createdAt) }}</div>
+            <div class="time-line">{{ formatTime(row.createdAt) }}</div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column prop="isMustRead" label="必读" width="80">
         <template #default="{ row }">{{ row.isMustRead ? '是' : '否' }}</template>
       </el-table-column>
@@ -39,12 +46,31 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="100">
+      <el-table-column label="操作" width="140">
         <template #default="{ row }">
+          <el-button link type="primary" @click="showDetail(row)">详情</el-button>
           <el-button link type="danger" @click="deleteWithConfirm(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <el-dialog v-model="detailVisible" title="公告详情" width="520px">
+      <template v-if="detailTarget">
+        <div class="detail-row"><span class="detail-label">标题</span>{{ detailTarget.title }}</div>
+        <div class="detail-row">
+          <span class="detail-label">发布时间</span>
+          <div class="date-time-cell">
+            <div class="date-line">{{ formatDate(detailTarget.createdAt) }}</div>
+            <div class="time-line">{{ formatTime(detailTarget.createdAt) }}</div>
+          </div>
+        </div>
+        <div class="detail-row"><span class="detail-label">必读</span>{{ detailTarget.isMustRead ? '是' : '否' }}</div>
+        <div v-if="detailTarget.isMustRead" class="detail-row">
+          <span class="detail-label">目标角色</span>
+          {{ detailTarget.targetRole === 'user' ? '学生/老师' : detailTarget.targetRole === 'venue_admin' ? '场地管理员' : detailTarget.targetRole === 'all' ? '全部' : '-' }}
+        </div>
+        <div class="detail-row content-row"><span class="detail-label">内容</span><div class="detail-content">{{ detailTarget.content || '-' }}</div></div>
+      </template>
+    </el-dialog>
     <el-dialog v-model="deleteConfirmVisible" title="确认删除" width="400px">
       <p>确定要删除公告「{{ deleteTarget?.title }}」吗？此操作不可恢复。</p>
       <template #footer>
@@ -63,9 +89,36 @@ import { createAnnouncement, getAnnouncementList, deleteAnnouncement } from '@/a
 const form = reactive({ title: '', content: '', isMustRead: false, targetRole: 'all' as 'user' | 'venue_admin' | 'all' });
 const loading = ref(false);
 const list = ref<any[]>([]);
+const detailVisible = ref(false);
+const detailTarget = ref<any | null>(null);
 const deleteConfirmVisible = ref(false);
 const deleteTarget = ref<{ id: number; title: string } | null>(null);
 const deleteLoading = ref(false);
+
+function formatDate(s: string | undefined): string {
+  if (!s) return '-';
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return '-';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function formatTime(s: string | undefined): string {
+  if (!s) return '-';
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return '-';
+  const h = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const sec = String(d.getSeconds()).padStart(2, '0');
+  return `${h}:${min}:${sec}`;
+}
+
+function showDetail(row: any) {
+  detailTarget.value = row;
+  detailVisible.value = true;
+}
 
 async function submit() {
   if (!form.title || !form.content) {
@@ -114,3 +167,13 @@ async function load() {
 
 onMounted(load);
 </script>
+
+<style scoped>
+.date-time-cell { line-height: 1.4; }
+.date-line { font-size: 13px; color: #303133; }
+.time-line { font-size: 12px; color: #909399; }
+.detail-row { margin-bottom: 12px; }
+.detail-row .detail-label { display: inline-block; width: 80px; color: #909399; margin-right: 8px; vertical-align: top; }
+.detail-row.content-row .detail-label { margin-top: 2px; }
+.detail-content { display: inline-block; max-width: 380px; white-space: pre-wrap; word-break: break-word; }
+</style>

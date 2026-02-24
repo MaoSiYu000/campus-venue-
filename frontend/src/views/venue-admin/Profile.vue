@@ -231,10 +231,11 @@ onMounted(() => {
 .profile-page {
   margin: -20px;
   width: calc(100% + 40px);
-  min-height: calc(100vh - 60px);
+  height: calc(100vh - 90px);
+  overflow: hidden;
   padding: 20px;
   box-sizing: border-box;
-  background-image: url('/images/底纹.png');
+  background-image: url('/images/背景2.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

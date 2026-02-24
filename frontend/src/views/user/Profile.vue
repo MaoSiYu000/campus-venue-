@@ -249,14 +249,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 负边距抵消布局 padding，底纹从页眉下铺满整页 */
+/* 负边距抵消布局 padding，底纹从页眉下铺满整页，页面高度固定为浏览器高度，不可滚动 */
 .profile-page {
   margin: -20px;
   width: calc(100% + 40px);
-  min-height: calc(100vh - 60px);
+  height: calc(100vh - 90px);
   padding: 20px;
   box-sizing: border-box;
-  background-image: url('/images/底纹.png');
+  overflow: hidden;
+  background-image: url('/images/背景2.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

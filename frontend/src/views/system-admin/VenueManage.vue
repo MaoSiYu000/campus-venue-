@@ -439,14 +439,18 @@ onMounted(load);
 <style scoped>
 .venue-manage-page {
   padding: 16px 20px;
-  background: #f5f7fa;
-  min-height: 100%;
+  background: transparent;
+  min-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .page-title {
   margin: 0 0 16px;
   font-size: 18px;
   font-weight: 600;
   color: #303133;
+  flex-shrink: 0;
 }
 .card-toolbar,
 .card-filter {
@@ -455,6 +459,7 @@ onMounted(load);
   border-radius: 4px;
   padding: 12px 16px;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 .card-toolbar {
   padding: 14px 16px;
@@ -477,6 +482,9 @@ onMounted(load);
 .filter-sep { margin: 0 8px; color: #909399; font-size: 12px; }
 
 .table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   background: #fff;
   border: 1px solid #e4e7ed;
   border-radius: 4px;

@@ -25,18 +25,19 @@ const activeMenu = computed(() => route.path);
 </script>
 
 <style scoped>
-.layout { height: 100%; flex-direction: column; }
+.layout { height: 100vh; flex-direction: column; overflow: hidden; }
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #1e3a5f;
+  height: 90px;
+  background: #325ba7;
   color: #fff;
   position: relative;
   z-index: 10;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-.title { margin-right: auto; font-weight: bold; flex-shrink: 0; }
+.title { margin-right: auto; font-weight: bold; flex-shrink: 0; font-size: 24px; }
 .nav-right {
   display: flex;
   align-items: center;
@@ -45,11 +46,11 @@ const activeMenu = computed(() => route.path);
 }
 .nav-right .tab {
   padding: 0 16px;
-  height: 60px;
-  line-height: 60px;
+  height: 90px;
+  line-height: 90px;
   color: #fff;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 21px;
   white-space: nowrap;
   position: relative;
   border-bottom: 3px solid transparent;
@@ -59,5 +60,10 @@ const activeMenu = computed(() => route.path);
   background: rgba(255,255,255,0.1);
   border-bottom-color: rgba(255,255,255,0.8);
 }
-.el-main { padding: 20px; background: #f5f7fa; }
+.el-main {
+  padding: 20px;
+  background: url('/images/背景2.jpg') center center / cover no-repeat;
+  min-height: calc(100vh - 90px);
+  flex: 1;
+}
 </style>

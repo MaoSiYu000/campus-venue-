@@ -42,7 +42,7 @@
     </div>
 
     <div class="table-wrap">
-      <el-tabs v-model="activeTab">
+      <el-tabs v-model="activeTab" class="account-tabs">
         <el-tab-pane label="学生/老师" name="users">
           <el-table :data="filteredUsers" border stripe @selection-change="onUserSelectionChange">
             <el-table-column type="selection" width="50" />
@@ -393,14 +393,18 @@ onMounted(load);
 <style scoped>
 .account-manage-page {
   padding: 16px 20px;
-  background: #f5f7fa;
-  min-height: 100%;
+  background: transparent;
+  min-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .page-title {
   margin: 0 0 16px;
   font-size: 18px;
   font-weight: 600;
   color: #303133;
+  flex-shrink: 0;
 }
 .card-toolbar,
 .card-filter {
@@ -409,6 +413,7 @@ onMounted(load);
   border-radius: 4px;
   padding: 12px 16px;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 .card-toolbar {
   padding: 14px 16px;
@@ -430,10 +435,41 @@ onMounted(load);
 .filter-form :deep(.el-form-item__label) { color: #606266; }
 
 .table-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: #fff;
   border: 1px solid #e4e7ed;
   border-radius: 4px;
   padding: 16px;
+}
+.account-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.account-tabs :deep(.el-tabs__header) {
+  order: 0;
+  flex-shrink: 0;
+  margin: 0 0 12px 0;
+  padding: 0;
+  background: #fff;
+}
+.account-tabs :deep(.el-tabs__nav-wrap) { background: #fff; }
+.account-tabs :deep(.el-tabs__item) { color: #606266; }
+.account-tabs :deep(.el-tabs__item.is-active) { color: #325ba7; font-weight: 600; }
+.account-tabs :deep(.el-tabs__active-bar),
+.account-tabs :deep(.el-tabs__ink-bar) { background-color: #325ba7; }
+.account-tabs :deep(.el-tabs__content) {
+  order: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #fff;
 }
 .table-wrap :deep(.el-table) { font-size: 13px; }
 .table-wrap :deep(.el-table th) { background: #f5f7fa; color: #606266; font-weight: 500; }

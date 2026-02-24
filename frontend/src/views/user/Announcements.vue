@@ -81,19 +81,28 @@
       </Transition>
     </Teleport>
 
-    <!-- 已确认或从菜单进入：固定高度，上公告下通知，各自内部滚动 -->
+    <!-- 已确认或从菜单进入：三区域，按页面比例固定布局 -->
     <div v-show="!showConfirmModal" class="content-wrap">
-      <h2 class="page-title">通知与公告</h2>
+      <div class="title-box">
+        <h2 class="page-title-serif">通知与公告</h2>
+      </div>
       <div class="panel announcements-panel">
         <h3 class="section-title">公告</h3>
         <div class="panel-inner">
           <el-empty v-if="!historyList.length && !historyLoading" description="暂无公告" />
           <template v-else>
-            <el-card v-for="a in historyList" :key="'h-' + a.id" class="announcement-card">
-              <h3>{{ a.title }}</h3>
-              <div class="content">{{ a.content }}</div>
-              <div class="time">{{ a.createdAt }}</div>
-            </el-card>
+            <div
+              v-for="a in historyList"
+              :key="'h-' + a.id"
+              class="announcement-title-item"
+              @click="openAnnouncementDetail(a)"
+            >
+              <div class="ann-date-square">
+                <div class="ann-date-top">{{ formatAnnDate(a.createdAt) }}</div>
+                <div class="ann-date-bottom">{{ formatAnnYearMonth(a.createdAt) }}</div>
+              </div>
+              <div class="ann-title-text">{{ a.title }}</div>
+            </div>
           </template>
         </div>
       </div>
@@ -105,15 +114,24 @@
             <el-card v-for="n in notifications" :key="'n-' + n.id" class="announcement-card notif-card" :class="{ unread: !n.isRead }">
               <span class="notif-close" :class="{ loading: deletingId === n.id }" @click="deleteNotif(n)" title="删除">×</span>
               <div class="notif-body">
-                <h3>{{ n.title }}</h3>
+                <h3><span class="status-badge">{{ n.title }}</span></h3>
                 <div class="content">{{ n.content }}</div>
-                <div class="time">{{ n.createdAt }}</div>
+                <div class="time">{{ formatNotifDate(n.createdAt) }}</div>
               </div>
             </el-card>
           </template>
         </div>
       </div>
     </div>
+
+    <!-- 公告详情弹窗 -->
+    <el-dialog v-model="detailVisible" title="公告详情" width="500px" class="announcement-detail-dialog">
+      <template v-if="detailAnnouncement">
+        <h3 class="detail-title">{{ detailAnnouncement.title }}</h3>
+        <div class="detail-content">{{ detailAnnouncement.content }}</div>
+        <div class="detail-time">{{ detailAnnouncement.createdAt }}</div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -134,6 +152,8 @@ const notifications = ref<Array<{ id: number; title: string; content: string; cr
 const historyLoading = ref(false);
 const notifLoading = ref(false);
 const deletingId = ref<number | null>(null);
+const detailVisible = ref(false);
+const detailAnnouncement = ref<Announcement | null>(null);
 
 // 弹窗用：未确认时展示的必读与通知
 const modalMustRead = ref<Announcement[]>([]);
@@ -229,6 +249,31 @@ async function confirmAllAndEnter() {
   }
 }
 
+function formatAnnDate(s: string | undefined): string {
+  if (!s) return '-';
+  const d = new Date(s);
+  return String(d.getDate());
+}
+function formatAnnYearMonth(s: string | undefined): string {
+  if (!s) return '-';
+  const d = new Date(s);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+function formatNotifDate(s: string | undefined): string {
+  if (!s) return '-';
+  const d = new Date(s);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function openAnnouncementDetail(a: Announcement) {
+  detailAnnouncement.value = a;
+  detailVisible.value = true;
+}
+
 async function deleteNotif(n: { id: number; title: string }) {
   deletingId.value = n.id;
   try {
@@ -245,37 +290,161 @@ async function deleteNotif(n: { id: number; title: string }) {
 
 <style scoped>
 .page {
-  height: calc(100vh - 100px);
+  height: 100%;
+  max-height: calc(100vh - 130px);
   display: flex;
   flex-direction: column;
-  max-width: 720px;
-  margin: 0 auto;
-}
-.content-wrap {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  width: 100%;
+  padding: 0;
   overflow: hidden;
 }
-.page-title { margin: 0 0 12px; font-size: 18px; font-weight: 600; flex-shrink: 0; }
-.panel {
+.content-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
   flex: 1;
   min-height: 0;
+}
+/* 通知与公告：左 1/8，上 1/16 到 1/4，与公告栏同宽 */
+.title-box {
+  position: absolute;
+  left: 12.5%;
+  width: 25%;
+  top: 6.25%;
+  height: 18.75%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  background: #325ba7;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+.page-title-serif {
+  margin: 0;
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
+  font-weight: 700;
+  font-size: clamp(18px, 2.2vw, 24px);
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+/* 公告：宽度与标题一致，上下高度变短 */
+.announcements-panel {
+  position: absolute;
+  left: 12.5%;
+  width: 25%;
+  top: 32.65%;
+  bottom: 27.5%;
   display: flex;
   flex-direction: column;
   border: 1px solid #ebeef5;
   border-radius: 8px;
   background: #fafafa;
+  min-height: 0;
 }
-.panel:first-of-type { margin-bottom: 12px; }
-.panel .section-title {
-  font-size: 14px;
-  color: #409eff;
+.announcements-panel .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
+  color: #fff;
   margin: 0;
   padding: 10px 14px;
-  border-bottom: 1px solid #ebeef5;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  background: #325ba7;
+  border-radius: 8px 8px 0 0;
+  flex-shrink: 0;
+}
+.announcements-panel .panel-inner {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px;
+}
+/* 每条公告：长方体，紧密排列无间隔，日期正方形在内部有间隔 */
+.announcement-title-item {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 12px 10px;
+  min-height: 72px;
   background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  overflow: hidden;
+}
+.announcement-title-item + .announcement-title-item { border-top: none; }
+.announcement-title-item:hover {
+  background: #ecf5ff;
+  border-color: #409eff;
+}
+.ann-date-square {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  margin-right: 12px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ann-date-top {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #87ceeb;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+.ann-date-bottom {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #325ba7;
+  font-size: 12px;
+  border-top: 1px solid #e8e8e8;
+}
+.ann-title-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 16px;
+  color: #303133;
+  line-height: 1.35;
+  min-width: 0;
+}
+/* 站内通知：左 3/8+1/16 到右 1/8，上 1/16 到底-1/16 */
+.panel.notifications-panel {
+  position: absolute;
+  left: 43.75%;
+  right: 12.5%;
+  top: 6.25%;
+  bottom: 6.25%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  background: #fafafa;
+  min-height: 0;
+}
+.panel .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
+  color: #fff;
+  margin: 0;
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  background: #325ba7;
   border-radius: 8px 8px 0 0;
   flex-shrink: 0;
 }
@@ -285,11 +454,13 @@ async function deleteNotif(n: { id: number; title: string }) {
   overflow-y: auto;
   padding: 12px 14px;
 }
-.announcement-card { margin-bottom: 16px; }
+.announcement-card { margin-bottom: 32px; }
 .announcement-card.unread { border-left: 3px solid #409eff; }
 .announcement-card h3 { margin-bottom: 8px; }
-.announcement-card .content { white-space: pre-wrap; color: #666; margin: 8px 0; }
-.announcement-card .time { font-size: 12px; color: #999; }
+
+.detail-title { margin: 0 0 12px; font-size: 16px; text-align: center; }
+.detail-content { white-space: pre-wrap; color: #555; line-height: 1.6; margin-bottom: 12px; }
+.detail-time { font-size: 12px; color: #999; }
 
 .notif-card { position: relative; padding-left: 36px; }
 .notif-close {
@@ -311,9 +482,23 @@ async function deleteNotif(n: { id: number; title: string }) {
 }
 .notif-close:hover { background: rgba(245, 108, 108, 0.12); color: #f56c6c; }
 .notif-close.loading { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
-.notif-body { flex: 1; }
-.content { white-space: pre-wrap; color: #666; margin: 8px 0; }
-.time { font-size: 12px; color: #999; }
+.notif-body { flex: 1; position: relative; min-height: 48px; padding-bottom: 20px; }
+.notif-body .content { white-space: pre-wrap; color: #666; margin: 8px 0; font-size: 15px; }
+.status-badge {
+  display: inline;
+  background: #7f9ee7;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 18px;
+}
+.notif-body .time {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 12px;
+  color: #999;
+}
 
 /* 弹窗：半透明遮罩 + 居中白框 */
 .confirm-overlay {

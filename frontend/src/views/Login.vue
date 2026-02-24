@@ -88,6 +88,7 @@ const bgImages = ref<string[]>([
   `${base}/images/2.png`,
   `${base}/images/3.png`,
   `${base}/images/4.jpg`,
+  `${base}/images/5.jpg`,
 ]);
 const currentSlide = ref(0);
 const imgFailed = ref<Record<number, boolean>>({});
@@ -188,7 +189,7 @@ async function onSubmit() {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #0a1628;
+  background: url('/images/背景2.jpg') center center / cover no-repeat;
 }
 
 .login-header {
@@ -199,8 +200,7 @@ async function onSubmit() {
   align-items: center;
   justify-content: flex-start;
   padding-left: clamp(20px, 5vw, 56px);
-  background: rgba(45, 90, 135, 0.7);
-  backdrop-filter: blur(8px);
+  background: #325ba7;
   color: #fff;
 }
 
@@ -257,7 +257,7 @@ async function onSubmit() {
 .carousel-fallback {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #1e3a5f 100%);
+  background: url('/images/背景2.jpg') center center / cover no-repeat;
   z-index: 0;
 }
 
@@ -321,6 +321,6 @@ async function onSubmit() {
   height: calc(100vh / 32);
   min-height: 24px;
   flex-shrink: 0;
-  background: #1e3a5f;
+  background: #325ba7;
 }
 </style>

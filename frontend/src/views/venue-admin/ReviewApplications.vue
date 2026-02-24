@@ -4,9 +4,10 @@
       <h2>审核申请</h2>
     </header>
     <div class="page-content">
-    <el-tabs v-model="activeTab" class="review-tabs">
-      <el-tab-pane label="待审核" name="pending">
-        <el-table :data="pendingList" v-loading="pendingLoading" border>
+      <el-tabs v-model="activeTab" class="review-tabs">
+        <el-tab-pane label="待审核" name="pending">
+          <div class="tab-pane-inner">
+            <el-table :data="pendingList" v-loading="pendingLoading" border>
           <el-table-column prop="id" label="ID" width="70" />
           <el-table-column label="场地" width="120">
             <template #default="{ row }">{{ row.venue?.name }}</template>
@@ -26,10 +27,12 @@
               <el-button link type="danger" @click="openReject(row)">驳回</el-button>
             </template>
           </el-table-column>
-        </el-table>
-      </el-tab-pane>
-      <el-tab-pane label="审批记录" name="history">
-        <el-table :data="historyList" v-loading="historyLoading" border>
+            </el-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="审批记录" name="history">
+          <div class="tab-pane-inner">
+            <el-table :data="historyList" v-loading="historyLoading" border>
           <el-table-column prop="id" label="ID" width="70" />
           <el-table-column label="场地" width="120">
             <template #default="{ row }">{{ row.venue?.name }}</template>
@@ -48,9 +51,10 @@
             </template>
           </el-table-column>
           <el-table-column prop="approvedAt" label="审批时间" width="160" />
-        </el-table>
-      </el-tab-pane>
-    </el-tabs>
+            </el-table>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
 
     <el-dialog v-model="detailVisible" title="申请详情" width="560px">
       <el-descriptions v-if="current" :column="1" border>
@@ -173,23 +177,76 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page { min-height: 100%; padding: 0; }
+.page {
+  min-height: calc(100vh - 100px);
+  width: calc(100% + 40px);
+  margin: -20px -20px 0 -20px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-sizing: border-box;
+}
 .page-banner {
   height: 18.75vh;
   min-height: 90px;
-  margin: -20px -20px 0 -20px;
+  margin: 0;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   padding-left: 6.25%;
+  padding-top: 68px;
   background-color: #e8f4ff;
-  background-image: url(/images/页面底纹.png), linear-gradient(180deg, #e8f4ff 0%, #f0f7ff 100%);
+  background-image: url(/images/页面底纹.jpg), linear-gradient(180deg, #e8f4ff 0%, #f0f7ff 100%);
   background-size: 100% 100%;
   background-position: 0 0;
   background-repeat: no-repeat;
   box-sizing: border-box;
 }
-.page-banner h2 { margin: 0; font-size: 32px; color: #1e3a5f; position: relative; z-index: 1; }
-.page-content { padding: 16px; }
-.review-tabs { margin-top: 12px; }
+.page-banner h2 { margin: 0; font-size: 32px; color: #fff; position: relative; z-index: 1; }
+.page-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+}
+.review-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* 页签栏：白色一行，固定在数据表格上方 */
+.review-tabs :deep(.el-tabs__header) {
+  order: 0;
+  margin: 0 0 0 0;
+  padding: 0 16px;
+  background: #fff;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid #ebeef5;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+.review-tabs :deep(.el-tabs__nav-wrap) { background: #fff; }
+.review-tabs :deep(.el-tabs__nav) { border: none; }
+.review-tabs :deep(.el-tabs__item) { color: #606266; }
+.review-tabs :deep(.el-tabs__item.is-active) { color: #325ba7; font-weight: 600; }
+.review-tabs :deep(.el-tabs__active-bar) { background-color: #325ba7; }
+.review-tabs :deep(.el-tabs__ink-bar) { background-color: #325ba7; }
+.review-tabs :deep(.el-tabs__content) {
+  order: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 0 0 8px 8px;
+  padding: 12px;
+}
+.tab-pane-inner {
+  min-height: 100%;
+}
 </style>

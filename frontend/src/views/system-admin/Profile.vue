@@ -45,8 +45,10 @@
                 class="recent-item"
                 @click="$router.push('/system-admin/announcements')"
               >
-                <span class="recent-badge">发布公告</span>
-                <div class="recent-meta">{{ a.title }}</div>
+                <div class="recent-meta">
+                  <span class="recent-title">{{ a.title }}</span>
+                  <span class="recent-content">{{ contentPreview(a.content) }}</span>
+                </div>
                 <div class="recent-time">{{ formatDate(a.createdAt) }}</div>
               </div>
             </template>
@@ -110,6 +112,13 @@ function formatDate(s: string) {
   if (!s) return '';
   const d = new Date(s);
   return d.toLocaleDateString('zh-CN') + ' ' + d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function contentPreview(content: string | undefined): string {
+  if (!content) return '';
+  const s = String(content).trim();
+  if (s.length <= 10) return s;
+  return s.slice(0, 10) + '…';
 }
 
 function openEdit() {
@@ -206,7 +215,7 @@ onMounted(() => {
   min-height: calc(100vh - 60px);
   padding: 20px;
   box-sizing: border-box;
-  background-image: url('/images/底纹.png');
+  background-image: url('/images/背景2.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -319,18 +328,20 @@ onMounted(() => {
   background: #f5f7fa;
 }
 
-.recent-badge {
-  flex-shrink: 0;
-  font-size: 12px;
-  color: #409eff;
-  font-weight: 500;
-}
-
 .recent-meta {
   flex: 1;
   font-size: 14px;
   color: #303133;
   min-width: 0;
+}
+.recent-title {
+  font-weight: bold;
+  margin-right: 8px;
+}
+.recent-content {
+  font-size: 13px;
+  color: #606266;
+  font-weight: normal;
 }
 
 .recent-time {

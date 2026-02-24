@@ -1,8 +1,8 @@
 <template>
   <div class="page">
-    <h2>全校预约总览</h2>
-    <el-tabs v-model="activeTab">
-      <el-tab-pane label="详细信息" name="detail">
+    <div class="page-content">
+      <el-tabs v-model="activeTab" class="overview-tabs">
+        <el-tab-pane label="详细信息" name="detail">
         <div class="toolbar">
           <el-radio-group v-model="statusFilter" size="default">
             <el-radio-button value="all">全部</el-radio-button>
@@ -34,8 +34,8 @@
             </template>
           </el-table-column>
         </el-table>
-      </el-tab-pane>
-      <el-tab-pane label="可视化分析" name="visual">
+        </el-tab-pane>
+        <el-tab-pane label="可视化分析" name="visual">
         <div class="visual-section">
           <h3>1. 按场地查看各时段预约情况</h3>
           <el-select v-model="selectedVenueId" placeholder="选择场地" clearable style="width: 220px; margin-bottom: 16px">
@@ -71,8 +71,9 @@
           </div>
           <p class="hint">统计未驳回的成功预约，近 30 天；与详细信息联动，删除后此处同步更新。</p>
         </div>
-      </el-tab-pane>
-    </el-tabs>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
@@ -199,7 +200,53 @@ onMounted(loadData);
 
 <style scoped>
 .page {
+  min-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.page-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   padding: 16px;
+  overflow: hidden;
+}
+/* 页签栏：白色一行 */
+.overview-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.overview-tabs :deep(.el-tabs__header) {
+  order: 0;
+  margin: 0;
+  padding: 0 16px;
+  background: #fff;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid #ebeef5;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+.overview-tabs :deep(.el-tabs__nav-wrap) { background: #fff; }
+.overview-tabs :deep(.el-tabs__nav) { border: none; }
+.overview-tabs :deep(.el-tabs__item) { color: #606266; }
+.overview-tabs :deep(.el-tabs__item.is-active) { color: #325ba7; font-weight: 600; }
+.overview-tabs :deep(.el-tabs__active-bar),
+.overview-tabs :deep(.el-tabs__ink-bar) { background-color: #325ba7; }
+.overview-tabs :deep(.el-tabs__content) {
+  order: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 0 0 8px 8px;
+  padding: 12px;
 }
 .toolbar {
   margin-bottom: 16px;

@@ -140,14 +140,15 @@ onMounted(load);
   align-items: center;
   justify-content: flex-start;
   padding-left: 6.25%;
+  padding-top: 68px;
   background-color: #e8f4ff;
-  background-image: url(/images/页面底纹.png), linear-gradient(180deg, #e8f4ff 0%, #f0f7ff 100%);
+  background-image: url(/images/页面底纹.jpg), linear-gradient(180deg, #e8f4ff 0%, #f0f7ff 100%);
   background-size: 100% 100%;
   background-position: 0 0;
   background-repeat: no-repeat;
   box-sizing: border-box;
 }
-.page-banner h2 { margin: 0; font-size: 32px; color: #1e3a5f; position: relative; z-index: 1; }
+.page-banner h2 { margin: 0; font-size: 32px; color: #fff; position: relative; z-index: 1; }
 .page-content { padding: 16px; }
 .capacity-sep { margin: 0 6px; color: #999; user-select: none; }
 .venue-card { cursor: pointer; margin-bottom: 16px; }
