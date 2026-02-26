@@ -388,8 +388,11 @@ async function confirmAllAndEnter() {
   justify-content: center;
   background: #fff;
   color: #325ba7;
-  font-size: 12px;
+  font-size: 11px;
   border-top: 1px solid #e8e8e8;
+  padding: 2px 0;
+  overflow: visible;
+  white-space: nowrap;
 }
 .ann-title-text {
   flex: 1;

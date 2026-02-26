@@ -1,6 +1,7 @@
 <template>
   <div class="page">
     <div class="form-wrap">
+      <h2 class="page-header">预约申请</h2>
       <el-card class="booking-card">
       <el-form :model="form" label-width="120px" class="booking-form">
         <el-form-item label="场地">
@@ -274,8 +275,21 @@ async function submit() {
 
 <style scoped>
 .page { display: flex; flex-direction: column; align-items: center; }
-.form-wrap { width: 100%; display: flex; justify-content: center; }
-.booking-card { max-width: 880px; width: 100%; }
+.form-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.page-header {
+  margin: 0;
+  padding: 12px 36px;
+  background: #325ba7;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 8px 8px 0 0;
+  width: 100%;
+  max-width: 880px;
+  box-sizing: border-box;
+}
+.booking-card { max-width: 880px; width: 100%; margin-top: 0; border-radius: 0 0 8px 8px; }
 .booking-form { text-align: left; }
 .booking-form :deep(.el-form-item) { justify-content: flex-start; }
 .booking-form :deep(.el-form-item__content) { justify-content: flex-start; }

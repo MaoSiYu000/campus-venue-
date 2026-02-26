@@ -1,7 +1,7 @@
 <template>
   <el-container class="layout">
     <el-header class="header">
-      <span class="title">校园场地预约系统 - 场地管理员</span>
+      <span class="title">场地管理员</span>
       <div class="nav-right">
         <router-link to="/venue-admin/applications" class="tab" :class="{ active: activeMenu === '/venue-admin/applications' }">审核申请</router-link>
         <router-link to="/venue-admin/overview" class="tab" :class="{ active: activeMenu === '/venue-admin/overview' }">预约总览</router-link>
@@ -13,6 +13,7 @@
     <el-main :class="{ 'no-scroll': activeMenu === '/venue-admin/announcements' || activeMenu === '/venue-admin/profile' }">
       <router-view />
     </el-main>
+    <el-footer class="page-footer">校园场地预约系统</el-footer>
   </el-container>
 </template>
 
@@ -31,7 +32,7 @@ onBeforeUnmount(() => { document.body.style.overflow = ''; });
 </script>
 
 <style scoped>
-.layout { height: 100%; flex-direction: column; min-height: 100vh; }
+.layout { height: 100vh; flex-direction: column; overflow: hidden; }
 .header {
   display: flex;
   align-items: center;
@@ -69,11 +70,24 @@ onBeforeUnmount(() => { document.body.style.overflow = ''; });
 .el-main {
   padding: 20px;
   background: url('/images/背景2.jpg') center center / cover no-repeat;
-  min-height: calc(100vh - 90px);
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 .el-main.no-scroll {
   overflow: hidden;
-  height: calc(100vh - 90px);
+}
+.page-footer {
+  height: calc(100vh / 32);
+  min-height: 24px;
+  flex-shrink: 0;
+  background: #325ba7;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 </style>

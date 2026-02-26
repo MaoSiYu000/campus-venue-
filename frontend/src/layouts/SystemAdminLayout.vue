@@ -1,7 +1,7 @@
 <template>
   <el-container class="layout">
     <el-header class="header">
-      <span class="title">校园场地预约系统 - 系统管理员</span>
+      <span class="title">系统管理员</span>
       <div class="nav-right">
         <router-link to="/system-admin/overview" class="tab" :class="{ active: activeMenu === '/system-admin/overview' }">预约总览</router-link>
         <router-link to="/system-admin/venues" class="tab" :class="{ active: activeMenu === '/system-admin/venues' }">场地管理</router-link>
@@ -13,6 +13,7 @@
     <el-main>
       <router-view />
     </el-main>
+    <el-footer class="page-footer">校园场地预约系统</el-footer>
   </el-container>
 </template>
 
@@ -63,7 +64,21 @@ const activeMenu = computed(() => route.path);
 .el-main {
   padding: 20px;
   background: url('/images/背景2.jpg') center center / cover no-repeat;
-  min-height: calc(100vh - 90px);
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.page-footer {
+  height: calc(100vh / 32);
+  min-height: 24px;
+  flex-shrink: 0;
+  background: #325ba7;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 </style>

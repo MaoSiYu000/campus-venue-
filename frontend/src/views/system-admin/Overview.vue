@@ -39,7 +39,7 @@
         </el-table>
         </el-tab-pane>
         <el-tab-pane label="可视化分析" name="visual">
-        <div class="visual-section">
+        <div class="visual-section" v-if="activeTab === 'visual'">
           <h3>1. 按场地查看各时段预约情况</h3>
           <el-select v-model="selectedVenueId" placeholder="选择场地" clearable style="width: 220px; margin-bottom: 16px">
             <el-option v-for="v in venues" :key="v.id" :label="v.name" :value="v.id" />
@@ -61,15 +61,23 @@
           </div>
           <p v-else class="hint">请先选择场地，数据来自未驳回的成功预约。</p>
         </div>
-        <div class="visual-section">
+        <div class="visual-section" v-if="activeTab === 'visual'">
           <h3>2. 各场地近期预约次数</h3>
-          <div class="chart-wrap">
-            <div v-for="item in venueCountData" :key="item.venueId" class="bar-row">
-              <span class="bar-label">{{ item.venueName }}</span>
-              <div class="bar-track">
-                <div class="bar-fill count-bar" :style="{ width: item.percent + '%' }" />
+          <div class="pie-and-list-wrap">
+            <div class="pie-wrap">
+              <VChart v-if="venueCountData.length" :option="pieOption" autoresize class="pie-chart" />
+              <div v-else class="pie-empty">暂无数据</div>
+            </div>
+            <div class="venue-detail-list">
+              <div v-for="(item, idx) in venueCountData" :key="item.venueId" class="venue-detail-row">
+                <span class="detail-rank">{{ idx + 1 }}</span>
+                <span class="detail-name">{{ item.venueName }}</span>
+                <div class="detail-bar-track">
+                  <div class="detail-bar-fill" :style="{ width: item.percent + '%', backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }" />
+                </div>
+                <span class="detail-count">{{ item.count }} 次</span>
               </div>
-              <span class="bar-value">{{ item.count }} 次</span>
+              <div v-if="!venueCountData.length" class="detail-empty">暂无数据</div>
             </div>
           </div>
           <p class="hint">统计未驳回的成功预约，近 30 天；与详细信息联动，删除后此处同步更新。</p>
@@ -82,11 +90,18 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import VChart from 'vue-echarts';
+import { use } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { PieChart } from 'echarts/charts';
+import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import { getAllBookings, deleteBooking } from '@/api/booking';
 import { getVenueList } from '@/api/venue';
 import type { BookingApplication, BookingStatus } from '@/types';
 import type { Venue } from '@/types';
 import { ElMessage, ElMessageBox } from 'element-plus';
+
+use([CanvasRenderer, PieChart, TitleComponent, TooltipComponent, LegendComponent]);
 
 const activeTab = ref('detail');
 const list = ref<BookingApplication[]>([]);
@@ -172,6 +187,30 @@ const venueCountData = computed(() => {
   arr.sort((a, b) => b.count - a.count);
   const max = Math.max(1, ...arr.map((x) => x.count));
   return arr.map((x) => ({ ...x, percent: (x.count / max) * 100 }));
+});
+
+const PIE_COLORS = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
+
+const pieOption = computed(() => {
+  const data = venueCountData.value.map((x, idx) => ({
+    value: x.count,
+    name: x.venueName,
+    itemStyle: { color: PIE_COLORS[idx % PIE_COLORS.length], borderRadius: 6 },
+  }));
+  return {
+    color: PIE_COLORS,
+    tooltip: { trigger: 'item', formatter: '{b}: {c} 次 ({d}%)' },
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: false,
+        label: { show: false },
+        data,
+      },
+    ],
+  };
 });
 
 async function loadData() {
@@ -335,43 +374,93 @@ onMounted(loadData);
   color: #c0c4cc;
 }
 
-.chart-wrap {
-  max-width: 560px;
+.pie-and-list-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  margin-top: 20px;
+  min-height: 280px;
 }
-.bar-row {
+.pie-wrap {
+  flex: 0 0 280px;
+  height: 280px;
+  min-height: 280px;
+  background: #fafafa;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.pie-chart {
+  width: 100%;
+  height: 100%;
+}
+.pie-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #909399;
+  font-size: 14px;
+}
+.venue-detail-list {
+  flex: 1;
+  min-width: 0;
+  height: 280px;
+  overflow-y: auto;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fff;
+}
+.venue-detail-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 4px;
 }
-.bar-label {
+.venue-detail-row:hover {
+  background: #f5f7fa;
+}
+.detail-rank {
+  width: 24px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #409eff;
+}
+.detail-name {
   width: 100px;
   flex-shrink: 0;
-  font-size: 13px;
-  color: #606266;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #303133;
 }
-.bar-track {
+.detail-bar-track {
   flex: 1;
-  height: 22px;
+  min-width: 60px;
+  height: 18px;
   background: #f0f0f0;
   border-radius: 4px;
   overflow: hidden;
 }
-.bar-fill {
+.detail-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #409eff 0%, #66b1ff 100%);
   border-radius: 4px;
   min-width: 0;
   transition: width 0.3s;
 }
-.bar-fill.count-bar {
-  background: linear-gradient(90deg, #67c23a 0%, #85ce61 100%);
-}
-.bar-value {
-  width: 56px;
+.detail-count {
   flex-shrink: 0;
-  font-size: 13px;
+  color: #67c23a;
+  font-weight: 500;
+}
+.detail-empty {
+  padding: 24px;
+  text-align: center;
   color: #909399;
+  font-size: 14px;
 }
 .hint {
   font-size: 13px;

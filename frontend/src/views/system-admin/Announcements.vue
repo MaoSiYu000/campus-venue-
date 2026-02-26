@@ -1,30 +1,40 @@
 <template>
   <div class="page">
-    <h2>发布公告</h2>
-    <el-card style="max-width: 640px">
-      <el-form :model="form" label-width="100px">
-        <el-form-item label="标题">
-          <el-input v-model="form.title" placeholder="公告标题" />
-        </el-form-item>
-        <el-form-item label="内容">
-          <el-input v-model="form.content" type="textarea" :rows="5" placeholder="公告内容" />
-        </el-form-item>
-        <el-form-item label="登录必读">
-          <el-switch v-model="form.isMustRead" />
-        </el-form-item>
-        <el-form-item v-if="form.isMustRead" label="目标角色">
-          <el-radio-group v-model="form.targetRole">
-            <el-radio value="user">学生/老师</el-radio>
-            <el-radio value="venue_admin">场地管理员</el-radio>
-            <el-radio value="all">全部</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" :loading="loading" @click="submit">发布</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-    <h3 style="margin-top: 24px">历史公告</h3>
+    <div class="announcements-wrapper">
+      <div class="announcements-flip" :class="{ flipped: showHistory }">
+        <div class="announcements-face publish-face">
+          <h2 class="panel-title">发布公告</h2>
+          <div class="panel-body publish-body">
+            <el-form :model="form" label-width="150px">
+              <el-form-item label="标题">
+                <el-input v-model="form.title" placeholder="公告标题" />
+              </el-form-item>
+              <el-form-item label="内容">
+                <el-input v-model="form.content" type="textarea" :rows="8" placeholder="公告内容" />
+              </el-form-item>
+              <el-form-item label="登录必读">
+                <el-switch v-model="form.isMustRead" />
+              </el-form-item>
+              <el-form-item v-if="form.isMustRead" label="目标角色">
+                <el-radio-group v-model="form.targetRole">
+                  <el-radio value="user">学生/老师</el-radio>
+                  <el-radio value="venue_admin">场地管理员</el-radio>
+                  <el-radio value="all">全部</el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :loading="loading" @click="submit">发布</el-button>
+              </el-form-item>
+            </el-form>
+            <div class="corner-tab" title="查看历史公告" @click.stop="showHistory = true">
+              <span class="corner-tab-text">历史</span>
+            </div>
+          </div>
+        </div>
+        <div class="announcements-face history-face" :class="{ 'no-pointer': !showHistory }">
+          <h2 class="panel-title">历史公告</h2>
+          <div class="panel-body history-body">
+            <div class="history-table-wrap">
     <el-table :data="list" border>
       <el-table-column prop="title" label="标题" />
       <el-table-column prop="createdAt" label="发布时间" width="120">
@@ -53,6 +63,14 @@
         </template>
       </el-table-column>
     </el-table>
+            </div>
+            <div class="corner-tab history-corner" title="返回发布公告" @click.stop="showHistory = false">
+              <span class="corner-tab-text">发布</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <el-dialog v-model="detailVisible" title="公告详情" width="520px">
       <template v-if="detailTarget">
         <div class="detail-row"><span class="detail-label">标题</span>{{ detailTarget.title }}</div>
@@ -94,6 +112,7 @@ const detailTarget = ref<any | null>(null);
 const deleteConfirmVisible = ref(false);
 const deleteTarget = ref<{ id: number; title: string } | null>(null);
 const deleteLoading = ref(false);
+const showHistory = ref(false);
 
 function formatDate(s: string | undefined): string {
   if (!s) return '-';
@@ -169,6 +188,126 @@ onMounted(load);
 </script>
 
 <style scoped>
+.announcements-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  perspective: 1200px;
+  margin-top: 70px;
+}
+.announcements-flip {
+  width: 891px;
+  max-width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.2s ease;
+  transform: scale(0.9);
+  transform-origin: top center;
+}
+.announcements-flip.flipped {
+  transform: scale(0.9) rotateY(180deg);
+}
+.announcements-face {
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+.announcements-face.no-pointer {
+  pointer-events: none;
+}
+.history-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+}
+.publish-face {
+  display: flex;
+  flex-direction: column;
+}
+.panel-title {
+  margin: 0;
+  padding: 19px 36px;
+  background: #325ba7;
+  color: #fff;
+  font-size: 27px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 8px 8px 0 0;
+  flex-shrink: 0;
+}
+.panel-body {
+  padding: 25px 30px 84px 30px;
+  position: relative;
+  flex: 1;
+  min-height: 294px;
+  display: flex;
+  flex-direction: column;
+}
+.publish-body {
+  padding-top: 50px;
+}
+.publish-body :deep(.el-form-item) {
+  margin-bottom: 17px;
+}
+.publish-body :deep(.el-form-item__label) {
+  font-size: 21px;
+}
+.publish-body :deep(.el-input__inner),
+.publish-body :deep(.el-textarea__inner) {
+  font-size: 21px;
+}
+.publish-body :deep(.el-input__inner::placeholder),
+.publish-body :deep(.el-textarea__inner::placeholder) {
+  font-size: 21px;
+}
+.publish-body :deep(.el-form) {
+  flex: 1;
+}
+.history-body {
+  padding: 25px 30px 84px 30px;
+}
+.history-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.corner-tab {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background: #325ba7;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 14px 14px 0;
+  z-index: 20;
+  transition: opacity 0.2s;
+  filter: drop-shadow(3px 3px 8px rgba(0, 0, 0, 0.35));
+}
+.corner-tab:hover {
+  opacity: 0.9;
+}
+.corner-tab-text {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 500;
+  pointer-events: none;
+}
+.history-corner {
+  background: #325ba7;
+}
 .date-time-cell { line-height: 1.4; }
 .date-line { font-size: 13px; color: #303133; }
 .time-line { font-size: 12px; color: #909399; }
