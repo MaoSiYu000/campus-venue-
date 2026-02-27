@@ -62,10 +62,17 @@ onBeforeUnmount(() => { document.body.style.overflow = ''; });
   position: relative;
   border-bottom: 3px solid transparent;
   box-sizing: border-box;
+  width: 112px;
+  text-align: center;
 }
 .nav-right .tab:hover {
   background: rgba(255,255,255,0.1);
   border-bottom-color: rgba(255,255,255,0.8);
+}
+.nav-right .tab.active {
+  background: rgba(255,255,255,0.2);
+  border-bottom-color: #fff;
+  font-weight: 600;
 }
 .el-main {
   padding: 20px;
