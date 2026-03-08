@@ -21,7 +21,7 @@ import { UploadModule } from './upload/upload.module';
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'campus_venue',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false,
+      synchronize: true,
       charset: 'utf8mb4',
       extra: { charset: 'utf8mb4' },
     }),

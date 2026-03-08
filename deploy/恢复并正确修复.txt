@@ -1,0 +1,13 @@
+# 上一步误改了 phpfpm_status.conf，按下面顺序在服务器执行：
+
+# 1. 恢复被误改的文件
+cp /www/server/panel/vhost/nginx/phpfpm_status.conf.bak /www/server/panel/vhost/nginx/phpfpm_status.conf
+
+# 2. 查找包含 120.26.124.180 的正确配置文件
+grep -l "120.26.124.180" /www/server/panel/vhost/nginx/*.conf
+
+# 3. 假设上面输出是 120.26.124.180.conf，则执行（把文件名换成实际输出的）：
+# python3 fix-nginx-uploads.py /www/server/panel/vhost/nginx/120.26.124.180.conf
+
+# 若没有单独站点配置，可能 120.26.124.180 在主配置或 default 里，再查：
+grep -r "120.26.124.180" /www/server/panel/vhost/nginx/ /www/server/nginx/
