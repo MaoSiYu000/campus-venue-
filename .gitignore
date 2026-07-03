@@ -5,6 +5,13 @@ node_modules/
 .env
 .env.local
 .env.*.local
+backend/.env
+
+# 部署配置（含服务器 IP 等隐私信息）
+deploy/
+
+# 压缩包
+*.zip
 
 # 构建产物
 dist/
